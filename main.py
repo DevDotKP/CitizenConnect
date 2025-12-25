@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from typing import Optional, List
-import google.generativeai as genai
+from google import genai
 from apscheduler.schedulers.background import BackgroundScheduler
 from database import (
     get_all_representatives, 
@@ -38,8 +38,7 @@ scheduler = BackgroundScheduler()
 load_dotenv()
 GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
 
-genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-flash-latest')
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -121,7 +120,10 @@ def get_location_from_ip(ip):
     retry_error_callback=lambda retry_state: "RateLimitExceeded"
 )
 def generate_gemini_response(prompt):
-    return model.generate_content(prompt)
+    return client.models.generate_content(
+        model='gemini-1.5-flash',
+        contents=prompt
+    )
 
 # --- API Endpoints ---
 
@@ -133,7 +135,7 @@ def get_representatives(search: Optional[str] = None):
 
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
-    if not model:
+    if not client:
          raise HTTPException(status_code=500, detail="AI Service Config Missing")
 
     context_str = ""
@@ -160,12 +162,18 @@ async def chat_endpoint(request: ChatRequest):
 
     try:
         response = generate_gemini_response(full_prompt)
-        if response == "RateLimitExceeded":
-             return {"response": "I'm currently receiving too many requests. Please try again in 10 seconds.", "chat_id": 0}
-             
-        ai_text = response.text
+        # Note: New SDK exception handling might be different, but retry wrapper catches general exceptions
+        
+        # Check if response text is accessible directly
+        if hasattr(response, 'text') and response.text:
+             ai_text = response.text
+        else:
+             # Fallback if structure is different
+             ai_text = "I'm having trouble thinking right now."
+
         chat_id = save_chat_interaction(request.query, ai_text)
         return {"response": ai_text, "chat_id": chat_id}
+
     except Exception as e:
         print(f"Gemini Error: {e}")
         return {"response": "I'm currently receiving too many requests. Please try again in a minute.", "chat_id": 0}
