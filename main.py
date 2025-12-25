@@ -28,13 +28,14 @@ from dotenv import load_dotenv
 import json
 import bcrypt
 import secrets
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 # --- Scheduler ---
 scheduler = BackgroundScheduler()
 
 # --- Config ---
 load_dotenv()
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
 
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-flash-latest')
