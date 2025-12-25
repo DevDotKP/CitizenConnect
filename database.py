@@ -115,7 +115,7 @@ def init_db():
         user_query TEXT,
         ai_response TEXT,
         rating INTEGER,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     ''')
 
@@ -123,8 +123,8 @@ def init_db():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_sessions (
         session_id TEXT PRIMARY KEY,
-        start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-        last_heartbeat DATETIME DEFAULT CURRENT_TIMESTAMP,
+        start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_heartbeat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         duration_seconds INTEGER DEFAULT 0,
         ip_address TEXT,
         location TEXT, 
@@ -141,7 +141,7 @@ def init_db():
         session_id TEXT,
         event_type TEXT,
         details TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(session_id) REFERENCES user_sessions(session_id)
     )
     ''')

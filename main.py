@@ -162,7 +162,6 @@ async def chat_endpoint(request: ChatRequest):
 
     try:
         response = generate_gemini_response(full_prompt)
-        # Note: New SDK exception handling might be different, but retry wrapper catches general exceptions
         
         # Check if response text is accessible directly
         if hasattr(response, 'text') and response.text:
