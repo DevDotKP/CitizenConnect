@@ -3,19 +3,17 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 from datetime import datetime
-from database import get_daily_stats
-from dotenv import load_dotenv
-
-load_dotenv()
-
-SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-SMTP_USER = os.getenv("SMTP_USER")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
-RECIPIENT_EMAIL = "dev.kp271828@gmail.com" # Updated to assumed format or just use the user provided handle
+from database import get_daily_stats, get_advanced_stats
+from security_utils import get_secret
 
 def send_daily_report():
-    from database import get_daily_stats, get_advanced_stats
+    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    smtp_port = int(os.getenv("SMTP_PORT", 587))
+    smtp_user = get_secret("SMTP_USER")
+    smtp_password = get_secret("SMTP_PASSWORD")
+    admin_email = smtp_user # Send to self/admin
+    recipient_email = admin_email
+
     stats = get_daily_stats()
     adv_stats = get_advanced_stats()
     
@@ -71,9 +69,9 @@ def send_daily_report():
     """
     
     # 2. Send Email
-    if not SMTP_USER or not SMTP_PASSWORD:
+    if not smtp_user or not smtp_password:
         print("--- [MOCK EMAIL SENT] ---")
-        print(f"To: {RECIPIENT_EMAIL}")
+        print(f"To: {recipient_email}")
         print(f"Subject: {subject}")
         print("Body: (HTML content hidden for brevity)")
         print("--- End Mock Email ---")
@@ -81,17 +79,17 @@ def send_daily_report():
 
     try:
         msg = MIMEMultipart()
-        msg['From'] = SMTP_USER
-        msg['To'] = RECIPIENT_EMAIL
+        msg['From'] = smtp_user
+        msg['To'] = recipient_email
         msg['Subject'] = subject
         msg.attach(MIMEText(html_content, 'html'))
         
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
+        server.login(smtp_user, smtp_password)
         server.send_message(msg)
         server.quit()
-        print(f"Daily report email sent to {RECIPIENT_EMAIL}")
+        print(f"Daily report email sent to {recipient_email}")
     except Exception as e:
         print(f"Failed to send email: {e}")
 

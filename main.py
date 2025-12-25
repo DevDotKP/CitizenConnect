@@ -23,6 +23,7 @@ from database import (
     get_recent_chats
 )
 from email_service import send_daily_report
+from security_utils import get_secret
 from dotenv import load_dotenv
 import json
 import bcrypt
@@ -42,7 +43,7 @@ app = FastAPI()
 security = HTTPBasic()
 
 def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
-    correct_username = os.getenv("ADMIN_USERNAME")
+    correct_username = get_secret("ADMIN_USERNAME")
     stored_hash = os.getenv("ADMIN_PASSWORD_HASH") # Expects bcrypt hash
     
     if not correct_username or not stored_hash:
@@ -99,6 +100,15 @@ def get_location_from_ip(ip):
         pass
     return "Unknown", None, None
 
+# Helper for Retry
+@retry(
+    stop=stop_after_attempt(3), 
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry_error_callback=lambda retry_state: "RateLimitExceeded"
+)
+def generate_gemini_response(prompt):
+    return model.generate_content(prompt)
+
 # --- API Endpoints ---
 
 @app.get("/api/representatives")
@@ -135,7 +145,10 @@ async def chat_endpoint(request: ChatRequest):
     full_prompt = f"{system_prompt}\n\nUser: {request.query}\nResponse:"
 
     try:
-        response = model.generate_content(full_prompt)
+        response = generate_gemini_response(full_prompt)
+        if response == "RateLimitExceeded":
+             return {"response": "I'm currently receiving too many requests. Please try again in 10 seconds.", "chat_id": 0}
+             
         ai_text = response.text
         chat_id = save_chat_interaction(request.query, ai_text)
         return {"response": ai_text, "chat_id": chat_id}
