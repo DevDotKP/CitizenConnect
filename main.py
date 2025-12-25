@@ -213,6 +213,10 @@ def get_stats(username: str = Depends(verify_admin)):
 def login(username: str = Depends(verify_admin)):
     return {"status": "logged_in", "username": username}
 
+@app.get("/healthChecker")
+def health_check():
+    return {"status": "ok"}
+
 # --- Static Files ---
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
