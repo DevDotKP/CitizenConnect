@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CitizenConnect | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRS9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .login-box {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            background: var(--primary);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .dashboard {
+            display: none;
+            padding: 2rem;
+        }
+
+        .stat-cards {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--glass-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: var(--text-muted);
+        }
+
+        .list-section {
+            background: var(--glass-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loginSection" class="login-box">
+        <h2>Admin Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="errorMsg" style="color: #ff6b6b; margin-top: 1rem; display: none;"></p>
+    </div>
+
+    <div id="dashboardSection" class="dashboard container">
+        <header>
+            <div class="logo">Admin Dashboard</div>
+            <button onclick="logout()"
+                style="background:none; border:none; color:white; cursor:pointer;">Logout</button>
+        </header>
+
+        <h2 style="margin-bottom: 2rem;">Overview (Today)</h2>
+
+        <div class="stat-cards">
+            <div class="stat-card">
+                <h3 id="statUsers">0</h3>
+                <p>New Users</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="statDuration">0s</h3>
+                <p>Avg Session Duration</p>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div class="list-section">
+                <h3>Traffic Trends</h3>
+                <canvas id="trafficChart"></canvas>
+            </div>
+            <div class="list-section">
+                <h3>Top Locations</h3>
+                <canvas id="locationChart"></canvas>
+            </div>
+        </div>
+
+        <h2 style="margin: 2rem 0 1rem 0;">Visitor Map</h2>
+        <div class="list-section" style="padding: 0; overflow: hidden; height: 400px; margin-bottom: 2rem;">
+            <div id="worldMap" style="width: 100%; height: 100%;"></div>
+        </div>
+
+        <!-- Chat Logs -->
+        <h2 style="margin: 2rem 0 1rem 0;">Recent Chat Interactions</h2>
+        <div class="list-section" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; color: white;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--glass-border); text-align: left;">
+                        <th style="padding: 1rem;">Time</th>
+                        <th style="padding: 1rem;">User Query</th>
+                        <th style="padding: 1rem;">AI Response</th>
+                        <th style="padding: 1rem;">Rating</th>
+                    </tr>
+                </thead>
+                <tbody id="chatLogBody">
+                    <!-- Injected via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+            <div class="list-section">
+                <h3 style="margin-bottom: 1.5rem;">Top Actions</h3>
+                <div id="topActionsList">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+            <div class="list-section">
+                <h3 style="margin-bottom: 1.5rem; color: #ff6b6b;">Common Drop-off Points</h3>
+                <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1rem;">Users last active at:</p>
+                <div id="dropOffList">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/static/admin.js"></script>
+</body>
+
+</html>
