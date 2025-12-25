@@ -50,6 +50,7 @@ Render's free database lasts only 90 days. For permanent free storage, use **Neo
    - Set `ENCRYPTION_KEY` in Render (Copy from your local `.env`).
    - Set `SMTP_USER`, `SMTP_PASSWORD`, `ADMIN_USERNAME` using the **Encrypted Strings** (starting with `gAAAA...`) from your local `.env`.
    - Set `DATABASE_URL` (From Neon).
+     - **Note**: Paste the entire connection string starting with `postgres://...` you copied from Neon.tech here.
    - Set `GOOGLE_API_KEY` (Plain text).
    - Set `ADMIN_PASSWORD_HASH` (Copy the `$2b$...` hash).
 

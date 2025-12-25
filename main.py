@@ -1,6 +1,7 @@
 import os
 import uvicorn
 import requests
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Depends, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -40,7 +41,18 @@ GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-flash-latest')
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    try:
+        init_db()
+    except Exception as e:
+        print(f"Startup DB Error: {e}")
+    yield
+    # Shutdown
+    # (Optional: close connections if needed, though usually handled per request)
+
+app = FastAPI(lifespan=lifespan)
 security = HTTPBasic()
 
 def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
@@ -49,6 +61,7 @@ def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
     
     if not correct_username or not stored_hash:
         # Fallback or Fail Safe
+        print("Admin configuration missing")
         raise HTTPException(status_code=500, detail="Admin configuration missing")
 
     is_correct_username = secrets.compare_digest(credentials.username, correct_username)
@@ -205,7 +218,6 @@ async def read_admin():
 
 # Initialize DB on import to ensure tables exist
 from database import init_db
-init_db()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
