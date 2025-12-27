@@ -228,16 +228,20 @@ async def chat_endpoint(request: ChatRequest):
         # Debugging: Print full response to logs
         print(f"DEBUG: Gemini Response: {response}")
 
-        # Check for Safety/Other Blocks
-        # The SDK structure might vary, let's try to inspect candidates
+        # Check for Safety/Other Blocks (Candidates logic)
         if hasattr(response, 'candidates') and response.candidates:
             first_candidate = response.candidates[0]
-            # check finish reason
             if hasattr(first_candidate, 'finish_reason') and first_candidate.finish_reason != "STOP":
                  print(f"DEBUG: Finish Reason: {first_candidate.finish_reason}")
-                 # If blocked by safety, usually finish_reason is 'SAFETY' or similar
                  if "SAFETY" in str(first_candidate.finish_reason):
                      return {"response": "I cannot answer this question as it may violate safety guidelines.", "chat_id": 0}
+
+        # Check for Prompt Feedback (Blocked before candidates)
+        if hasattr(response, 'prompt_feedback') and response.prompt_feedback:
+            pf = response.prompt_feedback
+            if hasattr(pf, 'block_reason') and pf.block_reason:
+                print(f"DEBUG: Prompt Feedback Block: {pf.block_reason}")
+                return {"response": f"Input info blocked. Reason: {pf.block_reason}", "chat_id": 0}
 
         # Check if response text is accessible directly
         if hasattr(response, 'text') and response.text:
@@ -250,9 +254,14 @@ async def chat_endpoint(request: ChatRequest):
                      if parts:
                          ai_text = "".join([p.text for p in parts if hasattr(p, 'text')])
                      else:
-                         ai_text = f"No content generated. (Reason: {response.candidates[0].finish_reason if hasattr(response.candidates[0], 'finish_reason') else 'Unknown'})"
+                         reason = response.candidates[0].finish_reason if hasattr(response.candidates[0], 'finish_reason') else 'Unknown'
+                         ai_text = f"No content generated. (Finish Reason: {reason})"
                  else:
-                     ai_text = "Empty response from AI service."
+                     # Check if it was prompt feedback blocked (handled above, but fallback)
+                     if hasattr(response, 'prompt_feedback') and response.prompt_feedback:
+                         ai_text = f"Request blocked. {response.prompt_feedback}"
+                     else:
+                         ai_text = "Empty response from AI service."
              except Exception as e:
                  print(f"Error parsing fallback: {e}")
                  ai_text = "I'm having trouble processing the AI response structure."

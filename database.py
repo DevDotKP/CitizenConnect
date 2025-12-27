@@ -149,10 +149,25 @@ def init_db():
     conn.commit()
     
     # --- SEED DATA (If Empty) ---
-    cursor.execute("SELECT COUNT(*) FROM representatives")
+    print("Checking if database needs seeding...")
+    # Use alias 'inc' (item count) to be safe across drivers
+    cursor.execute("SELECT COUNT(*) as inc FROM representatives")
     count_res = cursor.fetchone()
+    
     # Handle PG vs SQLite return type
-    count = count_res['count'] if is_postgres and count_res else (count_res[0] if count_res else 0)
+    # Postgres RealDictCursor returns {'inc': 0}
+    # SQLite Row returns object accessible by index or name
+    try:
+        if is_postgres:
+            count = count_res['inc']
+        else:
+             # SQLite Row object supports dict-like access or index
+             count = count_res['inc'] if 'inc' in count_res.keys() else count_res[0]
+    except Exception as e:
+        print(f"Error reading count: {e}. Defaulting to 0 to attempt seed.")
+        count = 0
+
+    print(f"Current representative count: {count}")
 
     if count == 0:
         print("Seeding database with initial representatives...")
