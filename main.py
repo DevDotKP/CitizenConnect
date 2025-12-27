@@ -42,15 +42,40 @@ client = genai.Client(api_key=GOOGLE_API_KEY)
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from email_service import send_daily_report
+from geopy.geocoders import Nominatim
+from database import get_db_connection
 
 # Initialize Scheduler
 scheduler = AsyncIOScheduler()
+geolocator = Nominatim(user_agent="citizen_connect_app")
+
+# Global Context
+MP_CONTEXT = ""
+
+def load_mp_context():
+    global MP_CONTEXT
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT name, constituency, state, party FROM representatives")
+        mps = cur.fetchall()
+        
+        context_list = []
+        for mp in mps:
+            context_list.append(f"{mp['name']} ({mp['party']}) - {mp['constituency']}, {mp['state']}")
+            
+        MP_CONTEXT = "List of 18th Lok Sabha MPs:\n" + "\n".join(context_list)
+        print(f"Loaded {len(mps)} MPs into context.")
+        conn.close()
+    except Exception as e:
+        print(f"Error loading MP context: {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     try:
         init_db()
+        load_mp_context()
         
         # Schedule Daily Report at 8:00 AM IST (02:30 UTC)
         # IST is UTC+5:30. 8:00 AM IST = 02:30 AM UTC.
@@ -133,9 +158,23 @@ def get_location_from_ip(ip):
     retry_error_callback=lambda retry_state: "RateLimitExceeded"
 )
 def generate_gemini_response(prompt):
+    system_instruction = """
+    You are CitizenConnect AI, an expert on Indian politics and civic duties.
+    
+    RULES:
+    1. Your knowledge is based on the provided list of 18th Lok Sabha MPs.
+    2. STRICTLY ANSWER ONLY questions related to Indian representatives (MPs/MLAs), the CitizenConnect website, government schemes, or civic rights.
+    3. If asked about unrelated topics (e.g., "height of Mount Everest", "movie recommendations"), POLITELY REFUSE and gently steer the user back to civic topics.
+    4. Provide factual, concise answers.
+    5. At the very end of your response, provide a list of 3 suggested follow-up questions in this JSON-like format: 
+       SUGGESTIONS: ["Question 1", "Question 2", "Question 3"]
+    """
+    
+    full_prompt = f"{system_instruction}\n\nCONTEXT:\n{MP_CONTEXT}\n\nUSER QUERY: {prompt}"
+    
     return client.models.generate_content(
         model='gemini-1.5-flash',
-        contents=prompt
+        contents=full_prompt
     )
 
 # --- API Endpoints ---
@@ -235,6 +274,63 @@ async def test_email_endpoint():
     if success:
         return {"status": "success", "message": "Email sent"}
     return {"status": "error", "message": "Failed to send email"}
+
+@app.post("/api/detect-location")
+async def detect_location(request: Request):
+    data = await request.json()
+    lat = data.get("latitude")
+    lon = data.get("longitude")
+    
+    if not lat or not lon:
+        return {"status": "error", "message": "Missing coordinates"}
+        
+    try:
+        # Reverse geocode to get address
+        location = geolocator.reverse((lat, lon), language='en')
+        address = location.raw.get('address', {})
+        state = address.get('state', '')
+        district = address.get('state_district', '') or address.get('county', '')
+        
+        # Simple heuristic mapping: Try to find MP by district or state
+        # In a real app, we need a shapefile mapper. For now, we search the DB.
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Try finding constituency matches (fuzzy or direct)
+        mp_info = None
+        
+        # 1. Search by district name as constituency
+        if district:
+             district_clean = district.replace("District", "").strip()
+             cur.execute("SELECT * FROM representatives WHERE constituency ILIKE %s", (f"%{district_clean}%",))
+             mp_info = cur.fetchone()
+             
+        # 2. If not found, just return state info
+        if not mp_info and state:
+             cur.execute("SELECT * FROM representatives WHERE state ILIKE %s LIMIT 1", (f"%{state}%",))
+             mp_info = cur.fetchone()
+             
+        conn.close()
+        
+        if mp_info:
+            return {
+                "status": "success",
+                "location": f"{district}, {state}",
+                "mp": {
+                    "name": mp_info['name'],
+                    "constituency": mp_info['constituency'],
+                    "party": mp_info['party'],
+                    "state": mp_info['state']
+                },
+                "message": f"You are in {state}. Your likely representative context found."
+            }
+        else:
+            return {"status": "success", "location": f"{district}, {state}", "message": "No specific MP found for this location yet."}
+            
+    except Exception as e:
+        print(f"Location Error: {e}")
+        return {"status": "error", "message": str(e)}
 
 # --- Static Files ---
 app.mount("/static", StaticFiles(directory="static"), name="static")

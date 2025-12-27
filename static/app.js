@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchReps();
     startHeartbeat();
     trackEvent('page_view', 'home');
+
+    // Initial Chat Message
+    addMessage('Hello! I am your Citizen Assistant. I can help you find your MP or understand government schemes.\nSUGGESTIONS: ["Who is the MP of New Delhi?", "How are MPLADS funds used?", "What are my civic rights?"]', 'ai');
 });
 
 function startHeartbeat() {
@@ -97,6 +100,56 @@ function searchReps() {
     fetchReps(query);
 }
 
+/* --- Location Logic --- */
+function detectLocation() {
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+    }
+
+    const btn = document.querySelector('.location-btn');
+    btn.innerHTML = "⏳ Locating...";
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const payload = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        };
+
+        try {
+            const res = await fetch('/api/detect-location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            btn.innerHTML = "📍 My MP";
+
+            if (data.status === 'success') {
+                if (data.mp) {
+                    // Alert or show modal, for now let's just use alert
+                    alert(`You are in ${data.location}.\nYour MP is ${data.mp.name} (${data.mp.party}).`);
+                    // Also trigger chat to introduce
+                    toggleChat();
+                    addMessage(`I see you are in ${data.location}. Your MP is ${data.mp.name}. How can I help you regarding them?`, 'ai');
+                } else {
+                    alert(data.message);
+                }
+            } else {
+                alert("Could not detect MP: " + data.message);
+            }
+        } catch (e) {
+            console.error(e);
+            btn.innerHTML = "📍 My MP";
+            alert("Location check failed.");
+        }
+    }, () => {
+        btn.innerHTML = "📍 My MP";
+        alert("Unable to retrieve your location.");
+    });
+}
+
 /* --- Chat Logic --- */
 const chatWidget = document.getElementById('chatWidget');
 const chatMsgs = document.getElementById('chatMessages');
@@ -110,8 +163,8 @@ function handleEnter(e) {
     if (e.key === 'Enter') sendMessage();
 }
 
-async function sendMessage() {
-    const text = chatInput.value.trim();
+async function sendMessage(textOverride = null) {
+    const text = textOverride || chatInput.value.trim();
     if (!text) return;
 
     // User Msg
@@ -146,26 +199,54 @@ async function sendMessage() {
 function addMessage(text, type, chatId = null) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `msg ${type}`;
-    // Simple parsing for bullet points to new lines for AI
-    msgDiv.innerText = text;
+
+    // Parse Suggestions if present
+    let displayText = text;
+    let suggestions = [];
+
+    if (text.includes('SUGGESTIONS:')) {
+        const parts = text.split('SUGGESTIONS:');
+        displayText = parts[0].trim();
+        try {
+            suggestions = JSON.parse(parts[1].trim());
+        } catch (e) { console.error("Could not parse suggestions", e); }
+    }
+
+    msgDiv.innerText = displayText;
 
     // Add unique ID for removal if needed
     const tempId = Date.now();
     msgDiv.setAttribute('data-msg-id', tempId);
 
-    if (type === 'ai' && chatId) {
-        // Add Rating UI
-        const rateDiv = document.createElement('div');
-        rateDiv.className = 'rating';
-        rateDiv.innerHTML = `
-            Rate this answer: 
-            <span class="star" onclick="rateChat(${chatId}, 1, this)">★</span>
-            <span class="star" onclick="rateChat(${chatId}, 2, this)">★</span>
-            <span class="star" onclick="rateChat(${chatId}, 3, this)">★</span>
-            <span class="star" onclick="rateChat(${chatId}, 4, this)">★</span>
-            <span class="star" onclick="rateChat(${chatId}, 5, this)">★</span>
-        `;
-        msgDiv.appendChild(rateDiv);
+    if (type === 'ai') {
+        // Rating
+        if (chatId) {
+            const rateDiv = document.createElement('div');
+            rateDiv.className = 'rating';
+            rateDiv.innerHTML = `
+                Rate: 
+                <span class="star" onclick="rateChat(${chatId}, 1, this)">★</span>
+                <span class="star" onclick="rateChat(${chatId}, 2, this)">★</span>
+                <span class="star" onclick="rateChat(${chatId}, 3, this)">★</span>
+                <span class="star" onclick="rateChat(${chatId}, 4, this)">★</span>
+                <span class="star" onclick="rateChat(${chatId}, 5, this)">★</span>
+            `;
+            msgDiv.appendChild(rateDiv);
+        }
+
+        // Render Chips
+        if (suggestions.length > 0) {
+            const chipContainer = document.createElement('div');
+            chipContainer.className = 'suggestion-chips';
+            suggestions.forEach(s => {
+                const chip = document.createElement('button');
+                chip.className = 'chip';
+                chip.innerText = s;
+                chip.onclick = () => sendMessage(s);
+                chipContainer.appendChild(chip);
+            });
+            msgDiv.appendChild(chipContainer);
+        }
     }
 
     chatMsgs.appendChild(msgDiv);

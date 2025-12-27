@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
 
     <div class="container">
@@ -18,10 +20,12 @@
         <section class="hero">
             <h1>Connect with your<br>Elected Representatives</h1>
             <p>Transparency. Accountability. Progress.<br>Find who represents you and how they are performing.</p>
-            
+
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Enter your constituency (e.g., 'New Delhi')...">
                 <button onclick="searchReps()">Search</button>
+                <button onclick="detectLocation()" class="location-btn"
+                    style="margin-left: 0.5rem; background: #2ecc71;">📍 My MP</button>
             </div>
         </section>
 
@@ -35,14 +39,15 @@
 
     <!-- Chat Widget -->
     <button class="chat-toggle" onclick="toggleChat()">💬</button>
-    
+
     <div class="chat-widget" id="chatWidget">
         <div class="chat-header">
             <h4>Citizen Assistant (AI)</h4>
             <button class="close-btn" onclick="toggleChat()">×</button>
         </div>
         <div class="chat-messages" id="chatMessages">
-            <div class="msg ai">Hello! I am your AI assistant. Ask me anything about your local leaders, their funds, or achievements!</div>
+            <div class="msg ai">Hello! I am your AI assistant. Ask me anything about your local leaders, their funds, or
+                achievements!</div>
         </div>
         <div class="chat-input">
             <input type="text" id="chatInput" placeholder="Ask something..." onkeypress="handleEnter(event)">
@@ -52,4 +57,5 @@
 
     <script src="/static/app.js"></script>
 </body>
+
 </html>
