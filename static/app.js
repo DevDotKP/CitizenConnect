@@ -58,12 +58,20 @@ function renderReps(reps) {
     }
 
     reps.forEach(rep => {
-        const achievements = JSON.parse(rep.achievements);
+        let achievements = [];
+        try {
+            if (rep.achievements) {
+                achievements = JSON.parse(rep.achievements);
+            }
+        } catch (e) {
+            achievements = ["Data unavailable"];
+        }
+
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
             <div class="card-header">
-                <img src="${rep.image_url}" alt="${rep.name}" class="avatar">
+                <img src="${rep.image_url || 'https://via.placeholder.com/60?text=MP'}" alt="${rep.name}" class="avatar">
                 <div class="info">
                     <h3>${rep.name}</h3>
                     <span>${rep.role} • ${rep.party}</span>
@@ -73,21 +81,21 @@ function renderReps(reps) {
             <p style="font-size: 0.95rem;">${rep.bio}</p>
             <div class="stats">
                 <div class="stat-item">
-                    <span class="stat-val">${rep.years_in_office} Yrs</span>
+                    <span class="stat-val">${rep.years_in_office || '-'} Yrs</span>
                     <span class="stat-label">Term</span>
                 </div>
                  <div class="stat-item">
-                    <span class="stat-val">₹${rep.funds_spent}Cr</span>
+                    <span class="stat-val">₹${rep.funds_spent_crores || 0}Cr</span>
                     <span class="stat-label">Spent</span>
                 </div>
                  <div class="stat-item">
-                    <span class="stat-val">${rep.performance_rating}/5</span>
-                    <span class="stat-label">Rating</span>
+                    <span class="stat-val">${rep.attendance_percentage || 0}%</span>
+                    <span class="stat-label">Attend</span>
                 </div>
             </div>
             <div style="margin-top:1rem;">
                 <span class="stat-label">Key Achievement:</span>
-                <p style="font-size:0.9rem;">✨ ${achievements[0]}</p>
+                <p style="font-size:0.9rem;">✨ ${achievements[0] || 'N/A'}</p>
             </div>
         `;
         grid.appendChild(card);
@@ -127,15 +135,23 @@ function detectLocation() {
             btn.innerHTML = "📍 My MP";
 
             if (data.status === 'success') {
+                let msg = `You are in ${data.location}.\n`;
+
                 if (data.mp) {
-                    // Alert or show modal, for now let's just use alert
-                    alert(`You are in ${data.location}.\nYour MP is ${data.mp.name} (${data.mp.party}).`);
-                    // Also trigger chat to introduce
-                    toggleChat();
-                    addMessage(`I see you are in ${data.location}. Your MP is ${data.mp.name}. How can I help you regarding them?`, 'ai');
-                } else {
-                    alert(data.message);
+                    msg += `MP: ${data.mp.name} (${data.mp.party})\n`;
                 }
+
+                if (data.local_reps) {
+                    const lr = data.local_reps;
+                    msg += `MLA: ${lr.mla_name || 'Unknown'} (${lr.mla_party || ''})\n`;
+                    msg += `Councillor: ${lr.councillor_name || 'Unknown'} (${lr.councillor_party || ''})`;
+                }
+
+                alert(msg);
+
+                // Also trigger chat to introduce
+                toggleChat();
+                addMessage(`I see you are in ${data.location}. Your MP is ${data.mp ? data.mp.name : 'unknown'}. How can I help you regarding them?`, 'ai');
             } else {
                 alert("Could not detect MP: " + data.message);
             }

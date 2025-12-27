@@ -110,41 +110,27 @@ def init_db():
     ''')
     
     cursor.execute(f'''
-    CREATE TABLE IF NOT EXISTS chat_history (
+    CREATE TABLE IF NOT EXISTS representatives (
         id {pk_type},
-        user_query TEXT,
-        ai_response TEXT,
-        rating INTEGER,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        name TEXT NOT NULL,
+        role TEXT NOT NULL,
+        party TEXT,
+        constituency TEXT,
+        state TEXT,
+        bio TEXT,
+        years_in_office INTEGER,
+        funds_spent_crores REAL,
+        funds_total_crores REAL,
+        attendance_percentage INTEGER,
+        achievements TEXT
     )
     ''')
 
-    # user_sessions (session_id is TEXT PK, reliable on both)
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS user_sessions (
-        session_id TEXT PRIMARY KEY,
-        start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_heartbeat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        duration_seconds INTEGER DEFAULT 0,
-        ip_address TEXT,
-        location TEXT, 
-        latitude REAL,
-        longitude REAL,
-        user_agent TEXT
-    )
-    ''')
-
-    # analytics_events (id PK)
-    cursor.execute(f'''
-    CREATE TABLE IF NOT EXISTS analytics_events (
-        id {pk_type},
-        session_id TEXT,
-        event_type TEXT,
-        details TEXT,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY(session_id) REFERENCES user_sessions(session_id)
-    )
-    ''')
+    # Migration for existing table (idempotent)
+    try:
+        cursor.execute("ALTER TABLE representatives ADD COLUMN IF NOT EXISTS achievements TEXT")
+    except Exception:
+        pass # Ignore if fails on SQLite or already exists in a way that doesn't duplicate
 
     conn.commit()
     
@@ -155,8 +141,6 @@ def init_db():
     count_res = cursor.fetchone()
     
     # Handle PG vs SQLite return type
-    # Postgres RealDictCursor returns {'inc': 0}
-    # SQLite Row returns object accessible by index or name
     try:
         if is_postgres:
             count = count_res['inc']
@@ -175,35 +159,39 @@ def init_db():
             (
                 "Narendra Modi", "Prime Minister", "BJP", "Varanasi", "Uttar Pradesh",
                 "India's 14th Prime Minister, focus on economic development and national security. Led BJP to third consecutive term in 2024. Launched initiatives like PM Awas Yojana (Housing).",
-                10, 50.5, 50.5, 98
+                10, 50.5, 50.5, 98,
+                '["3rd Term as PM", "G20 Presidency", "Digital India Expansion"]'
             ),
             (
                 "Rahul Gandhi", "Leader of Opposition", "INC", "Rae Bareli", "Uttar Pradesh",
                 "Leader of the Opposition in Lok Sabha (2024-). Spearheaded Bharat Jodo Yatra. Focus on social justice and caste census advocacy. Won from Wayanad and Rae Bareli in 2024.",
-                20, 12.0, 15.0, 85
+                20, 12.0, 15.0, 85,
+                '["Bharat Jodo Yatra", "Leader of Opposition 2024", "Caste Census Advocacy"]'
             ),
             (
                 "Amit Shah", "Home Minister", "BJP", "Gandhinagar", "Gujarat",
                 "Union Home Minister and Minister of Cooperation. Key strategist for BJP. Oversaw abrogation of Article 370 and new criminal laws. Longest serving Home Minister.",
-                5, 25.0, 25.0, 92
+                5, 25.0, 25.0, 92,
+                '["Abrogation of Article 370", "New Criminal Laws", "Cooperation Ministry"]'
             ),
             (
                 "Shashi Tharoor", "MP", "INC", "Thiruvananthapuram", "Kerala",
                 "Diplomat, author, and politician. Chairman of Parliamentary Committee on External Affairs. Former UN Under-Secretary-General. Known for literary works and articulate speeches.",
-                15, 8.5, 10.0, 90
+                15, 8.5, 10.0, 90,
+                '["Sahitya Akademi Award", "Chairman External Affairs", "Diplomatic Service"]'
             ) 
         ]
         
         # Postgres uses %s, SQLite uses ?
         if is_postgres:
             insert_sql = """
-            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
         else:
             insert_sql = """
-            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
             
         for rp in rps:

@@ -189,9 +189,76 @@ def generate_gemini_response(prompt):
 
 # --- API Endpoints ---
 
+# --- Helpers for Dynamic Data ---
+def fetch_dynamic_local_reps(location_str):
+    """
+    Uses Gemini to find the current MLA and Councillor for a specific location.
+    Returns a dict with 'mla' and 'councillor'.
+    """
+    if not client:
+        return None
+        
+    try:
+        prompt = f"""
+        I need the current Member of Legislative Assembly (MLA) and Municipal Councillor for: {location_str}, India.
+        Return strictly a JSON object with keys: "mla_name", "mla_party", "councillor_name", "councillor_party".
+        If unknown, use "Unknown". Do not add markdown.
+        """
+        response = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt
+        )
+        if response.text:
+            cleaned = response.text.replace('```json', '').replace('```', '').strip()
+            return json.loads(cleaned)
+    except Exception as e:
+        print(f"Dynamic Fetch Error: {e}")
+    return None
+
+# --- API Endpoints ---
+
 @app.get("/api/representatives")
 def get_representatives(search: Optional[str] = None):
     if search:
+        # Check for PIN Code (6 digits)
+        if search.isdigit() and len(search) == 6:
+            try:
+                location = geolocator.geocode(search + ", India")
+                if location:
+                    # Use the address to find MP
+                    # Nominatim address dict is complex, but display_name is usually "Area, City, State, PIN, Country"
+                    print(f"PIN Resolved: {location.address}")
+                    address_parts = location.address.split(",")
+                    # Try searching interesting parts (District/State)
+                    # For simplicity, we search the whole address string or key parts
+                    terms = [term.strip() for term in address_parts]
+                    
+                    # Try finding rep by district/city (terms before state)
+                    # This is heuristical.
+                    found_reps = []
+                    conn = get_db_connection()
+                    cur = conn.cursor()
+                    
+                    for term in terms:
+                         cur.execute("SELECT * FROM representatives WHERE constituency ILIKE %s OR state ILIKE %s", (f"%{term}%", f"%{term}%"))
+                         rows = cur.fetchall()
+                         if rows:
+                             found_reps.extend([dict(row) for row in rows])
+                             
+                    conn.close()
+                    
+                    # Deduplicate by ID
+                    seen = set()
+                    unique_reps = []
+                    for r in found_reps:
+                        if r['id'] not in seen:
+                            unique_reps.append(r)
+                            seen.add(r['id'])
+                            
+                    return unique_reps
+            except Exception as e:
+                print(f"PIN Search Error: {e}")
+
         return get_representative_by_location(search)
     return get_all_representatives()
 
@@ -340,6 +407,7 @@ async def detect_location(request: Request):
         address = location.raw.get('address', {})
         state = address.get('state', '')
         district = address.get('state_district', '') or address.get('county', '')
+        location_str = f"{district}, {state}"
         
         # Simple heuristic mapping: Try to find MP by district or state
         # In a real app, we need a shapefile mapper. For now, we search the DB.
@@ -363,10 +431,13 @@ async def detect_location(request: Request):
              
         conn.close()
         
+        # Dynamic Fetch for MLA/Councillor
+        local_reps = fetch_dynamic_local_reps(location_str)
+        
         if mp_info:
-            return {
+            response_data = {
                 "status": "success",
-                "location": f"{district}, {state}",
+                "location": location_str,
                 "mp": {
                     "name": mp_info['name'],
                     "constituency": mp_info['constituency'],
@@ -376,7 +447,12 @@ async def detect_location(request: Request):
                 "message": f"You are in {state}. Your likely representative context found."
             }
         else:
-            return {"status": "success", "location": f"{district}, {state}", "message": "No specific MP found for this location yet."}
+            response_data = {"status": "success", "location": location_str, "message": "No specific MP found for this location yet."}
+            
+        if local_reps:
+            response_data['local_reps'] = local_reps
+            
+        return response_data
             
     except Exception as e:
         print(f"Location Error: {e}")
