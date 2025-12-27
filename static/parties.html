@@ -145,8 +145,22 @@
                 <button class="info-btn" onclick="openCriteriaModal()">i</button>
             </div>
 
-            <div class="party-grid" id="nationalGrid">
+            <!-- Parliament Structure Chart -->
+            <div style="margin-bottom: 2rem; text-align: center;">
+                <h3 style="margin-bottom: 1rem; color: var(--text-muted); font-weight: 400;">18th Lok Sabha Structure
+                </h3>
+                <div id="parliamentChart"
+                    style="width:100%; height:300px; display:flex; justify-content:center; align-items:center;"></div>
+            </div>
+
+            <div class="party-grid" id="partiesList">
                 <!-- Injected via JS -->
+            </div>
+
+            <div style="text-align:center; margin-top:2rem;">
+                <button id="showMoreBtn" onclick="toggleParties()" class="btn-primary"
+                    style="padding: 0.8rem 2rem; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; font-size: 1rem; transition: all 0.2s;">View
+                    All Parties</button>
             </div>
         </section>
 

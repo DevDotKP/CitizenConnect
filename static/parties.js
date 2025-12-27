@@ -383,8 +383,8 @@ function drawMap() {
     data.addRows(rows);
 
     var options = {
-        // region: 'IN', // Reverted as per user request
-        // domain: 'IN',
+        region: 'IN', // Force India region to show correct borders
+        domain: 'IN',
         displayMode: 'regions',
         resolution: 'provinces',
         colorAxis: {
