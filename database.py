@@ -243,8 +243,19 @@ def get_advanced_stats():
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    is_postgres = os.getenv("DATABASE_URL") is not None
+    
+    if is_postgres:
+        # Postgres uses TO_CHAR for formatting and CURRENT_DATE
+        date_q = "date(timestamp) = CURRENT_DATE"
+        hour_q = "TO_CHAR(timestamp, 'HH24') as hour"
+    else:
+        # SQLite uses strftime and date('now')
+        date_q = "date(timestamp) = date('now')"
+        hour_q = "strftime('%H', timestamp) as hour"
+    
     # 1. Traffic by Hour (Today)
-    cursor.execute("SELECT strftime('%H', timestamp) as hour, COUNT(*) as count FROM analytics_events WHERE date(timestamp) = date('now') GROUP BY hour ORDER BY hour")
+    cursor.execute(f"SELECT {hour_q}, COUNT(*) as count FROM analytics_events WHERE {date_q} GROUP BY hour ORDER BY hour")
     traffic_by_hour = [dict(row) for row in cursor.fetchall()]
     
     # 2. Top Locations
