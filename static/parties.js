@@ -1,7 +1,6 @@
 // Load Google Charts with Indian Domain
 google.charts.load('current', {
     'packages': ['geochart'],
-    'mapsApiKey': 'YOUR_API_KEY_IF_NEEDED', // Optional, but domain logic works without strict key usually
     'language': 'en',
     'region': 'IN' // Helps for loader localization
 });
