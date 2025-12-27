@@ -109,22 +109,7 @@ def init_db():
     )
     ''')
     
-    cursor.execute(f'''
-    CREATE TABLE IF NOT EXISTS representatives (
-        id {pk_type},
-        name TEXT NOT NULL,
-        role TEXT NOT NULL,
-        party TEXT,
-        constituency TEXT,
-        state TEXT,
-        bio TEXT,
-        years_in_office INTEGER,
-        funds_spent_crores REAL,
-        funds_total_crores REAL,
-        attendance_percentage INTEGER,
-        achievements TEXT
-    )
-    ''')
+
 
     # Migration for existing table (idempotent)
     try:
