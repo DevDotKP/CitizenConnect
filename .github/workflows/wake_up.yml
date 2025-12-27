@@ -1,4 +1,5 @@
 name: Wake Up Render App
+# Trigger update
 
 on:
   schedule:
