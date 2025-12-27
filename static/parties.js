@@ -191,35 +191,140 @@ const stateVotesData = {
 };
 
 // Render National Grid
-document.addEventListener('DOMContentLoaded', () => {
-    const grid = document.getElementById('nationalGrid');
-    if (!grid) return; // Guard clause
+/* --- National Parties Logic (Collapsible) --- */
+let showAllParties = false;
 
-    nationalStats.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'party-card';
-        div.innerHTML = `
+function renderNationalParties() {
+    const grid = document.getElementById('partiesList');
+    const btn = document.getElementById('showMoreBtn');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    const limit = showAllParties ? nationalStats.length : 3;
+    const visibleParties = nationalStats.slice(0, limit);
+
+    visibleParties.forEach(party => {
+        const card = document.createElement('div');
+        card.className = 'party-card';
+        card.innerHTML = `
             <div class="party-header">
-                <img src="${p.symbol}" alt="${p.abbr}" style="width:40px;height:40px;object-fit:contain;">
+                <img src="${party.symbol}" alt="${party.abbr}" class="party-logo">
                 <div>
-                    <h3 style="margin:0;">${p.name}</h3>
-                    <span style="color:var(--text-muted);font-size:0.9rem;">${p.abbr}</span>
+                    <h3>${party.name}</h3>
+                    <span style="color:var(--text-muted); font-size:0.9rem;">${party.abbr}</span>
                 </div>
             </div>
-            <p style="font-size:0.9rem; color:var(--text-muted); flex-grow:1;">${p.desc}</p>
-            <div class="seat-stats">
-                <div style="text-align:center;">
-                    <span style="display:block; font-weight:bold; font-size:1.2rem;">${p.seats}</span>
-                    <span style="font-size:0.8rem; color:var(--text-muted);">Seats Won</span>
+            <p style="margin:1rem 0; font-size:0.9rem; color:#aaa; line-height:1.5;">${party.desc}</p>
+            <div class="party-stats">
+                <div>
+                    <span style="font-size:1.5rem; color:var(--primary); font-weight:bold;">${party.seats}</span>
+                    <span style="display:block; font-size:0.8rem; color:var(--text-muted);">Seats Won</span>
                 </div>
-                <div style="text-align:center;">
-                    <span style="display:block; font-weight:bold; font-size:1.2rem; color:var(--accent);">${p.voteShare}%</span>
-                    <span style="font-size:0.8rem; color:var(--text-muted);">Vote Share</span>
+                <div style="text-align:right;">
+                    <span style="font-size:1.5rem; color:white; font-weight:bold;">${party.percentage}%</span>
+                    <span style="display:block; font-size:0.8rem; color:var(--text-muted);">Vote Share</span>
                 </div>
             </div>
         `;
-        grid.appendChild(div);
+        grid.appendChild(card);
     });
+
+    if (nationalStats.length > 3) {
+        if (btn) {
+            btn.style.display = 'inline-block';
+            btn.innerText = showAllParties ? "Show Less" : "View All Parties";
+        }
+    } else {
+        if (btn) btn.style.display = 'none';
+    }
+}
+
+// Make explicit global for inline onclick
+window.toggleParties = function () {
+    showAllParties = !showAllParties;
+    renderNationalParties();
+}
+
+/* --- Parliament Chart (Hemicycle) --- */
+function drawParliamentChart() {
+    const container = document.getElementById('parliamentChart');
+    if (!container) return;
+
+    // Clear previous
+    container.innerHTML = '';
+
+    const width = container.offsetWidth || 600;
+    const height = 300;
+    const cx = width / 2;
+    const cy = height; // Bottom center
+    const radius = Math.min(width / 2, height) - 20;
+
+    const dots = [];
+    const rows = 12;
+    let seatsPlaced = 0;
+
+    const getPartyColor = (abbr) => {
+        if (abbr === 'BJP') return '#ff9933';
+        if (abbr === 'INC') return '#3B82F6';
+        if (abbr === 'SP') return '#EF4323';
+        if (abbr === 'TMC') return '#10B981';
+        if (abbr === 'DMK') return '#EF4444';
+        if (abbr === 'TDP') return '#FACC15';
+        if (abbr === 'AAP') return '#ffc107';
+        return '#888';
+    };
+
+    let seatColors = [];
+    nationalStats.forEach(p => {
+        const c = getPartyColor(p.abbr);
+        for (let i = 0; i < p.seats; i++) seatColors.push({ color: c, name: p.abbr });
+    });
+    while (seatColors.length < 543) seatColors.push({ color: '#666', name: 'Other' });
+
+    let svgContent = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
+
+    let currentSeatIndex = 0;
+
+    for (let r = 1; r <= rows; r++) {
+        const rowRadius = (radius / rows) * r + 20;
+        const dotsInRow = Math.floor((Math.PI * rowRadius) / 12);
+
+        for (let i = 0; i < dotsInRow && currentSeatIndex < 543; i++) {
+            const angle = Math.PI * (i / (dotsInRow - 1)); // 0 to PI
+            const x = cx - rowRadius * Math.cos(angle);
+            const y = cy - rowRadius * Math.sin(angle);
+
+            const seat = seatColors[currentSeatIndex] || { color: '#333', name: 'Vacant' };
+
+            svgContent += `<circle cx="${x}" cy="${y}" r="4" fill="${seat.color}">
+                 <title>${seat.name}</title>
+             </circle>`;
+
+            currentSeatIndex++;
+        }
+    }
+
+    svgContent += `
+        <text x="${cx}" y="${cy - 20}" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Inter">543</text>
+        <text x="${cx}" y="${cy - 5}" text-anchor="middle" fill="#aaa" font-size="12" font-family="Inter">Seats</text>
+    `;
+
+    svgContent += '</svg>';
+    container.innerHTML = svgContent;
+}
+
+// Initial Rendering
+document.addEventListener('DOMContentLoaded', () => {
+    renderNationalParties();
+    drawParliamentChart();
+    // drawMap is called by google charts listener
+});
+
+// Redraw charts on resize
+window.addEventListener('resize', () => {
+    drawMap();
+    drawParliamentChart();
 });
 
 function drawMap() {
