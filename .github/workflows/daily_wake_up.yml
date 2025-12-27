@@ -2,8 +2,8 @@ name: Wake Up Render App
 
 on:
   schedule:
-    # 8:25 AM IST = 02:55 UTC
-    - cron: '55 2 * * *'
+    # 8:40 AM IST = 03:10 UTC
+    - cron: '10 3 * * *'
   workflow_dispatch:
 
 jobs:
