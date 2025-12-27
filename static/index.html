@@ -11,40 +11,27 @@
 
 <body>
 
-    <div class="container">
-        <header>
-            <div class="logo">CitizenConnect</div>
-            <!-- Future: Nav links -->
-        </header>
+    <button onclick="detectLocation()" class="location-btn" style="margin-left: 0.5rem; background: #2ecc71;">📍 My
+        MP</button>
+    </div>
+    </section>
 
-        <section class="hero">
-            <h1>Connect with your<br>Elected Representatives</h1>
-            <p>Transparency. Accountability. Progress.<br>Find who represents you and how they are performing.</p>
+    <section id="resultsSection">
+        <h2 style="margin-bottom: 2rem;">Featured Representatives</h2>
+        <div class="grid" id="repsGrid">
+            <!-- Data injected via JS -->
+        </div>
+    </section>
 
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Enter your constituency (e.g., 'New Delhi')...">
-                <button onclick="searchReps()">Search</button>
-                <button onclick="detectLocation()" class="location-btn"
-                    style="margin-left: 0.5rem; background: #2ecc71;">📍 My MP</button>
-            </div>
-        </section>
-
-        <section id="resultsSection">
-            <h2 style="margin-bottom: 2rem;">Featured Representatives</h2>
-            <div class="grid" id="repsGrid">
-                <!-- Data injected via JS -->
-            </div>
-        </section>
-
-        <!-- Representative Details Modal -->
-        <div id="repModal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeRepModal()">&times;</span>
-                <div id="repModalBody">
-                    <!-- Dynamic Content -->
-                </div>
+    <!-- Representative Details Modal -->
+    <div id="repModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeRepModal()">&times;</span>
+            <div id="repModalBody">
+                <!-- Dynamic Content -->
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Chat Widget -->
