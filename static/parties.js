@@ -63,7 +63,23 @@ const stateVotesData = {
     'IN-DL': { name: 'Delhi', total: 7, results: [{ p: 'BJP', s: 7, c: '#ff9933' }] },
     'IN-HR': { name: 'Haryana', total: 10, results: [{ p: 'BJP', s: 5, c: '#ff9933' }, { p: 'INC', s: 5, c: '#19aaed' }] },
     'IN-UT': { name: 'Uttarakhand', total: 5, results: [{ p: 'BJP', s: 5, c: '#ff9933' }] },
-    'IN-HP': { name: 'Himachal Pradesh', total: 4, results: [{ p: 'BJP', s: 4, c: '#ff9933' }] }
+    'IN-HP': { name: 'Himachal Pradesh', total: 4, results: [{ p: 'BJP', s: 4, c: '#ff9933' }] },
+    'IN-JK': { name: 'Jammu & Kashmir', total: 5, results: [{ p: 'JKNC', s: 2, c: '#22c55e' }, { p: 'BJP', s: 2, c: '#ff9933' }, { p: 'IND', s: 1, c: '#999' }] },
+    'IN-AS': { name: 'Assam', total: 14, results: [{ p: 'BJP', s: 9, c: '#ff9933' }, { p: 'INC', s: 3, c: '#19aaed' }, { p: 'UPPL', s: 1, c: '#22c55e' }, { p: 'AGP', s: 1, c: '#22c55e' }] },
+    'IN-GA': { name: 'Goa', total: 2, results: [{ p: 'BJP', s: 1, c: '#ff9933' }, { p: 'INC', s: 1, c: '#19aaed' }] },
+    'IN-AR': { name: 'Arunachal Pradesh', total: 2, results: [{ p: 'BJP', s: 2, c: '#ff9933' }] },
+    'IN-MN': { name: 'Manipur', total: 2, results: [{ p: 'INC', s: 2, c: '#19aaed' }] },
+    'IN-ML': { name: 'Meghalaya', total: 2, results: [{ p: 'VPP', s: 1, c: '#333' }, { p: 'INC', s: 1, c: '#19aaed' }] },
+    'IN-MZ': { name: 'Mizoram', total: 1, results: [{ p: 'ZPM', s: 1, c: '#22c55e' }] },
+    'IN-NL': { name: 'Nagaland', total: 1, results: [{ p: 'INC', s: 1, c: '#19aaed' }] },
+    'IN-SK': { name: 'Sikkim', total: 1, results: [{ p: 'SKM', s: 1, c: '#22c55e' }] },
+    'IN-TR': { name: 'Tripura', total: 2, results: [{ p: 'BJP', s: 2, c: '#ff9933' }] },
+    'IN-CH': { name: 'Chandigarh', total: 1, results: [{ p: 'INC', s: 1, c: '#19aaed' }] },
+    'IN-LD': { name: 'Lakshadweep', total: 1, results: [{ p: 'INC', s: 1, c: '#19aaed' }] },
+    'IN-AN': { name: 'Andaman & Nicobar', total: 1, results: [{ p: 'BJP', s: 1, c: '#ff9933' }] },
+    'IN-LA': { name: 'Ladakh', total: 1, results: [{ p: 'IND', s: 1, c: '#999' }] },
+    'IN-DN': { name: 'Dadra & Nagar Haveli', total: 2, results: [{ p: 'BJP', s: 1, c: '#ff9933' }, { p: 'IND', s: 1, c: '#999' }] },
+    'IN-PY': { name: 'Puducherry', total: 1, results: [{ p: 'INC', s: 1, c: '#19aaed' }] }
 };
 
 function drawMap() {
