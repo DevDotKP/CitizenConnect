@@ -246,6 +246,15 @@ def init_db():
         # Patch Update: Ensure Real Representatives exist and have rich data
         print("Verifying core representatives...")
         
+        # FORCE CLEANUP: Remove broken dummy data (empty party, etc) to ensure clean demo
+        try:
+            # Delete entries where party is missing or empty, which causes the UI bug
+            cursor.execute("DELETE FROM representatives WHERE party IS NULL OR party = ''")
+            conn.commit()
+            print("Cleaned up broken/dummy data.")
+        except Exception as e:
+            print(f"Cleanup warning: {e}")
+
         # We'll define the core reps with their full data
         core_reps = [
             (
