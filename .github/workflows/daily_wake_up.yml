@@ -12,12 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check URL and Ping
-        env:
-          RENDER_URL: ${{ secrets.RENDER_APP_URL }}
         run: |
-          if [ -z "$RENDER_URL" ]; then
-            echo "Error: RENDER_APP_URL secret is not set."
-            exit 1
-          fi
+          RENDER_URL="https://citizenconnect-3um7.onrender.com"
           echo "Pinging $RENDER_URL/healthChecker"
           curl -I "$RENDER_URL/healthChecker"
