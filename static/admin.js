@@ -46,7 +46,15 @@ async function loadStats() {
     if (!headers) { logout(); return; }
 
     const res = await fetch(API_URL, { headers });
-    if (!res.ok) { logout(); return; }
+    if (!res.ok) {
+        if (res.status === 401) {
+            logout();
+        } else {
+            console.error("Stats API Error:", res.status, res.statusText);
+            // Optional: visual error feedback?
+        }
+        return;
+    }
 
     const data = await res.json();
 

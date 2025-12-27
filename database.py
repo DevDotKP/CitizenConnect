@@ -164,6 +164,49 @@ def init_db():
 
     conn.commit()
     
+    conn.commit()
+
+    # --- Analytics Tables ---
+    # Chat History
+    cursor.execute(f'''
+    CREATE TABLE IF NOT EXISTS chat_history (
+        id {pk_type},
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        user_query TEXT,
+        ai_response TEXT,
+        rating INTEGER
+    )
+    ''')
+    
+    # User Sessions
+    # session_id matches client-side UUID
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_sessions (
+        session_id TEXT PRIMARY KEY,
+        start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_heartbeat DATETIME DEFAULT CURRENT_TIMESTAMP,
+        duration_seconds REAL DEFAULT 0,
+        ip_address TEXT,
+        user_agent TEXT,
+        location TEXT,
+        latitude REAL,
+        longitude REAL
+    )
+    ''')
+    
+    # Analytics Events
+    cursor.execute(f'''
+    CREATE TABLE IF NOT EXISTS analytics_events (
+        id {pk_type},
+        session_id TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        event_type TEXT,
+        details TEXT
+    )
+    ''')
+
+    conn.commit()
+    
     # --- SEED DATA (If Empty) ---
     print("Checking if database needs seeding...")
     # Use alias 'inc' (item count) to be safe across drivers
