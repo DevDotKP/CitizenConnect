@@ -153,21 +153,47 @@ def init_db():
 def create_session(session_id, ip=None, user_agent=None, location=None, lat=None, lon=None):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT OR IGNORE INTO user_sessions (session_id, ip_address, user_agent, location, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?)", 
-                   (session_id, ip, user_agent, location, lat, lon))
+    
+    is_postgres = os.getenv("DATABASE_URL") is not None
+    
+    if is_postgres:
+        sql = """
+        INSERT INTO user_sessions (session_id, ip_address, user_agent, location, latitude, longitude) 
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT (session_id) DO NOTHING
+        """
+    else:
+        sql = "INSERT OR IGNORE INTO user_sessions (session_id, ip_address, user_agent, location, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?)"
+        
+    cursor.execute(sql, (session_id, ip, user_agent, location, lat, lon))
     conn.commit()
     conn.close()
 
 def update_session_heartbeat(session_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-    # Update last_heartbeat and recalculate duration
-    cursor.execute('''
-        UPDATE user_sessions 
-        SET last_heartbeat = CURRENT_TIMESTAMP,
-            duration_seconds = (strftime('%s', CURRENT_TIMESTAMP) - strftime('%s', start_time))
-        WHERE session_id = ?
-    ''', (session_id,))
+    
+    is_postgres = os.getenv("DATABASE_URL") is not None
+    
+    if is_postgres:
+        # Postgres: EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - start_time))
+        # Note: We need to cast timestamp to standard if needed, but CURRENT_TIMESTAMP works.
+        sql = '''
+            UPDATE user_sessions 
+            SET last_heartbeat = CURRENT_TIMESTAMP,
+                duration_seconds = EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - start_time))
+            WHERE session_id = ?
+        '''
+    else:
+        # SQLite: strftime('%s', ...)
+        sql = '''
+            UPDATE user_sessions 
+            SET last_heartbeat = CURRENT_TIMESTAMP,
+                duration_seconds = (strftime('%s', CURRENT_TIMESTAMP) - strftime('%s', start_time))
+            WHERE session_id = ?
+        '''
+
+    cursor.execute(sql, (session_id,))
     conn.commit()
     conn.close()
 
@@ -182,16 +208,28 @@ def get_daily_stats():
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    is_postgres = os.getenv("DATABASE_URL") is not None
+    
+    if is_postgres:
+        date_q = "date(start_time) = CURRENT_DATE"
+        date_q_ts = "date(timestamp) = CURRENT_DATE"
+    else:
+        date_q = "date(start_time) = date('now')"
+        date_q_ts = "date(timestamp) = date('now')"
+    
     # 1. New Users Today
-    cursor.execute("SELECT COUNT(*) FROM user_sessions WHERE date(start_time) = date('now')")
-    new_users = cursor.fetchone()[0]
+    cursor.execute(f"SELECT COUNT(*) FROM user_sessions WHERE {date_q}")
+    new_users = cursor.fetchone()['count'] if is_postgres else cursor.fetchone()[0]
     
     # 2. Avg Session Duration
-    cursor.execute("SELECT AVG(duration_seconds) FROM user_sessions WHERE date(start_time) = date('now')")
-    avg_duration = cursor.fetchone()[0] or 0
+    cursor.execute(f"SELECT AVG(duration_seconds) FROM user_sessions WHERE {date_q}")
+    row = cursor.fetchone()
+    # Postgres returns dictionary in RealDictCursor, SQLite row/tuple
+    val = row['avg'] if is_postgres and row else (row[0] if row else 0)
+    avg_duration = val or 0
     
     # 3. Top Actions
-    cursor.execute("SELECT event_type, COUNT(*) as count FROM analytics_events WHERE date(timestamp) = date('now') GROUP BY event_type ORDER BY count DESC LIMIT 5")
+    cursor.execute(f"SELECT event_type, COUNT(*) as count FROM analytics_events WHERE {date_q_ts} GROUP BY event_type ORDER BY count DESC LIMIT 5")
     top_actions = [dict(row) for row in cursor.fetchall()]
 
     conn.close()
