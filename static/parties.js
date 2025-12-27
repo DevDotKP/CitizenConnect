@@ -9,9 +9,9 @@ const nationalStats = [
         name: "Bharatiya Janata Party",
         abbr: "BJP",
         seats: 240,
-        percentage: 44.2, // Seats percentage (240/543)
+        percentage: 44.2,
         voteShare: 36.6,
-        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Bharatiya_Janata_Party_logo.svg/240px-Bharatiya_Janata_Party_logo.svg.png",
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Bharatiya_Janata_Party_logo.svg/120px-Bharatiya_Janata_Party_logo.svg.png",
         desc: "Ruling party, leads the NDA alliance. Ideology: Hindutva, Integral Humanism."
     },
     {
@@ -24,22 +24,130 @@ const nationalStats = [
         desc: "Main opposition, leads the INDIA alliance. Ideology: Secularism, Social Liberalism."
     },
     {
+        name: "Samajwadi Party",
+        abbr: "SP",
+        seats: 37,
+        percentage: 6.8,
+        voteShare: 4.6,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Samajwadi_Party_Flag.svg/240px-Samajwadi_Party_Flag.svg.png",
+        desc: "Major socialist party based in Uttar Pradesh. Key member of INDIA bloc."
+    },
+    {
+        name: "All India Trinamool Congress",
+        abbr: "TMC",
+        seats: 29,
+        percentage: 5.3,
+        voteShare: 4.4,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/All_India_Trinamool_Congress_symbol.svg/240px-All_India_Trinamool_Congress_symbol.svg.png",
+        desc: "Dominant governing party in West Bengal. Led by Mamata Banerjee."
+    },
+    {
+        name: "Dravida Munnetra Kazhagam",
+        abbr: "DMK",
+        seats: 22,
+        percentage: 4.1,
+        voteShare: 2.0,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/DMK_Flag.svg/240px-DMK_Flag.svg.png",
+        desc: "Governing party of Tamil Nadu. Ideology: Social Justice, Dravidianism."
+    },
+    {
+        name: "Telugu Desam Party",
+        abbr: "TDP",
+        seats: 16,
+        percentage: 2.9,
+        voteShare: 2.0,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Telugu_Desam_Party_Flag.svg/240px-Telugu_Desam_Party_Flag.svg.png",
+        desc: "Ruling party of Andhra Pradesh. Key ally in the NDA government."
+    },
+    {
+        name: "Janata Dal (United)",
+        abbr: "JD(U)",
+        seats: 12,
+        percentage: 2.2,
+        voteShare: 1.3,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Janata_Dal_%28United%29_Flag.svg/240px-Janata_Dal_%28United%29_Flag.svg.png",
+        desc: "Governing party in Bihar. Led by Nitish Kumar, NDA ally."
+    },
+    {
+        name: "Shiv Sena (UBT)",
+        abbr: "SS(UBT)",
+        seats: 9,
+        percentage: 1.7,
+        voteShare: 2.5,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Shiv_Sena_%28Uddhav_Balasaheb_Thackeray%29_logo.svg/240px-Shiv_Sena_%28Uddhav_Balasaheb_Thackeray%29_logo.svg.png",
+        desc: "Faction led by Uddhav Thackeray. Part of MVA (INDIA) in Maharashtra."
+    },
+    {
+        name: "NCP (Sharadchandra Pawar)",
+        abbr: "NCP(SP)",
+        seats: 8,
+        percentage: 1.5,
+        voteShare: 1.0,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/NCP_Sharad_Pawar_Flag.svg/240px-NCP_Sharad_Pawar_Flag.svg.png",
+        desc: "Faction led by Sharad Pawar. Part of MVA (INDIA) in Maharashtra."
+    },
+    {
+        name: "Shiv Sena",
+        abbr: "SHS",
+        seats: 7,
+        percentage: 1.3,
+        voteShare: 1.9,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Shiv_Sena_Logo.svg/180px-Shiv_Sena_Logo.svg.png",
+        desc: "Faction led by Eknath Shinde. NDA ally in Maharashtra."
+    },
+    {
+        name: "Lok Janshakti Party (RV)",
+        abbr: "LJP(RV)",
+        seats: 5,
+        percentage: 0.9,
+        voteShare: 0.5,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/LJP_Ram_Vilas_Symbol.svg/180px-LJP_Ram_Vilas_Symbol.svg.png",
+        desc: "Bihar-based party led by Chirag Paswan. NDA ally."
+    },
+    {
+        name: "CPI (Marxist)",
+        abbr: "CPI(M)",
+        seats: 4,
+        percentage: 0.7,
+        voteShare: 1.8,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Cpm_election_symbol.svg/200px-Cpm_election_symbol.svg.png",
+        desc: "Leading Left party, governs Kerala. Part of INDIA bloc."
+    },
+    {
         name: "Aam Aadmi Party",
         abbr: "AAP",
         seats: 3,
         percentage: 0.6,
         voteShare: 1.1,
         symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Aam_Aadmi_Party_logo_%28English%29.svg/240px-Aam_Aadmi_Party_logo_%28English%29.svg.png",
-        desc: "Governing Delhi & Punjab. Ideology: Populism, Anti-corruption."
+        desc: "Governing Delhi & Punjab. Part of INDIA bloc."
     },
     {
-        name: "Bahujan Samaj Party",
-        abbr: "BSP",
-        seats: 0,
-        percentage: 0,
-        voteShare: 2.0, // approx
-        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Elephant_Bahujan_Samaj_Party.svg/240px-Elephant_Bahujan_Samaj_Party.svg.png",
-        desc: "Represents Bahujans (SC/ST/OBC). Strong base in UP."
+        name: "JMM",
+        abbr: "JMM",
+        seats: 3,
+        percentage: 0.6,
+        voteShare: 0.4,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Jharkhand_Mukti_Morcha_flag.svg/240px-Jharkhand_Mukti_Morcha_flag.svg.png",
+        desc: "Ruling party in Jharkhand. Part of INDIA bloc."
+    },
+    {
+        name: "Communist Party of India",
+        abbr: "CPI",
+        seats: 2,
+        percentage: 0.4,
+        voteShare: 0.5,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/CPI-banner.svg/240px-CPI-banner.svg.png",
+        desc: "Left wing party. Part of INDIA bloc."
+    },
+    {
+        name: "AIMIM",
+        abbr: "AIMIM",
+        seats: 1,
+        percentage: 0.2,
+        voteShare: 0.3,
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/All_India_Majlis-e-Ittehadul_Muslimeen.svg/240px-All_India_Majlis-e-Ittehadul_Muslimeen.svg.png",
+        desc: "Hyderabad based party led by Asaduddin Owaisi."
     }
 ];
 
