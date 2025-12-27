@@ -168,23 +168,13 @@ def get_location_from_ip(ip):
     retry_error_callback=lambda retry_state: "RateLimitExceeded"
 )
 def generate_gemini_response(prompt):
-    system_instruction = """
-    You are CitizenConnect AI, an expert on Indian politics and civic duties.
-    
-    RULES:
-    1. Your knowledge is based on the provided list of 18th Lok Sabha MPs.
-    2. STRICTLY ANSWER ONLY questions related to Indian representatives (MPs/MLAs), the CitizenConnect website, government schemes, or civic rights.
-    3. If asked about unrelated topics (e.g., "height of Mount Everest", "movie recommendations"), POLITELY REFUSE and gently steer the user back to civic topics.
-    4. Provide factual, concise answers.
-    5. At the very end of your response, provide a list of 3 suggested follow-up questions in this JSON-like format: 
-       SUGGESTIONS: ["Question 1", "Question 2", "Question 3"]
-    """
-    
-    full_prompt = f"{system_instruction}\n\nCONTEXT:\n{MP_CONTEXT}\n\nUSER QUERY: {prompt}"
+    # Remove internal system prompt wrapping. 
+    # The caller (chat_endpoint) is responsible for constructing the full context/system prompt.
+    print(f"DEBUG: Generating content with prompt length: {len(prompt)}")
     
     return client.models.generate_content(
         model='gemini-1.5-flash',
-        contents=full_prompt
+        contents=prompt
     )
 
 # --- API Endpoints ---
@@ -295,6 +285,9 @@ async def chat_endpoint(request: ChatRequest):
         # Debugging: Print full response to logs
         print(f"DEBUG: Gemini Response: {response}")
 
+        if response == "RateLimitExceeded":
+             return {"response": "I'm currently receiving too many requests. Please try again in a minute.", "chat_id": 0}
+
         # Check for Safety/Other Blocks (Candidates logic)
         if hasattr(response, 'candidates') and response.candidates:
             first_candidate = response.candidates[0]
@@ -327,8 +320,9 @@ async def chat_endpoint(request: ChatRequest):
                      # Check if it was prompt feedback blocked (handled above, but fallback)
                      if hasattr(response, 'prompt_feedback') and response.prompt_feedback:
                          ai_text = f"Request blocked. {response.prompt_feedback}"
-                     else:
-                         ai_text = "Empty response from AI service."
+                     with open("debug_gemini_log.txt", "a") as f:
+                         f.write(f"\n--- ERROR ---\n{str(response)}\n")
+                     ai_text = "Empty response from AI service."
              except Exception as e:
                  print(f"Error parsing fallback: {e}")
                  ai_text = "I'm having trouble processing the AI response structure."

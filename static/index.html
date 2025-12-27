@@ -6,23 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CitizenConnect | Find Your Representative</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=2">
 </head>
 
 <body>
 
-    <button onclick="detectLocation()" class="location-btn" style="margin-left: 0.5rem; background: #2ecc71;">📍 My
-        MP</button>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+        <div class="globe globe-3"></div>
     </div>
-    </section>
 
-    <section id="resultsSection">
-        <h2 style="margin-bottom: 2rem;">Featured Representatives</h2>
-        <div class="grid" id="repsGrid">
-            <!-- Data injected via JS -->
-        </div>
-    </section>
+    <!-- Navigation -->
+    <nav
+        style="position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; gap: 1rem; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid var(--glass-border);">
+        <a href="/"
+            style="color: white; text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; border-radius: 20px; background: var(--primary);">Home</a>
+        <a href="/static/parties.html"
+            style="color: var(--text-muted); text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; border-radius: 20px; transition: all 0.3s;">Parties
+            & Map</a>
+    </nav>
 
+    <main class="container">
+        <header>
+            <div class="logo">CitizenConnect</div>
+        </header>
+
+        <section class="hero">
+            <h1>Connect with your<br>Elected Representatives</h1>
+            <p>Transparency. Accountability. Progress.<br>Find who represents you and how they are performing.</p>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Enter your constituency (e.g., 'New Delhi')...">
+                <button onclick="searchReps()">Search</button>
+                <button onclick="detectLocation()" class="location-btn"
+                    style="margin-left: 0.5rem; background: #2ecc71;">📍 My MP</button>
+            </div>
+        </section>
+
+        <section id="resultsSection">
+            <h2 style="margin-bottom: 2rem;">Featured Representatives</h2>
+            <div class="grid" id="repsGrid">
+                <!-- Data injected via JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Representative Details Modal -->
     <!-- Representative Details Modal -->
     <div id="repModal" class="modal">
         <div class="modal-content">
@@ -31,7 +61,6 @@
                 <!-- Dynamic Content -->
             </div>
         </div>
-    </div>
     </div>
 
     <!-- Chat Widget -->
@@ -52,7 +81,8 @@
         </div>
     </div>
 
-    <script src="/static/app.js"></script>
+    <!-- Cache Busting for App updates -->
+    <script src="/static/app.js?v=3"></script>
 </body>
 
 </html>
