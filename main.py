@@ -77,11 +77,11 @@ async def lifespan(app: FastAPI):
         init_db()
         load_mp_context()
         
-        # Schedule Daily Report at 8:00 AM IST (02:30 UTC)
-        # IST is UTC+5:30. 8:00 AM IST = 02:30 AM UTC.
-        scheduler.add_job(send_daily_report, 'cron', hour=2, minute=30)
+        # Schedule Daily Report at 8:30 AM IST (03:00 UTC) [TEMPORARY FOR TODAY]
+        # IST is UTC+5:30. 8:30 AM IST = 03:00 AM UTC.
+        scheduler.add_job(send_daily_report, 'cron', hour=3, minute=0)
         scheduler.start()
-        print("Scheduler started. Daily email set for 02:30 UTC (8:00 AM IST).")
+        print("Scheduler started. Daily email set for 03:00 UTC (8:30 AM IST).")
         
     except Exception as e:
         print(f"Startup Error: {e}")

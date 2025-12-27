@@ -2,8 +2,8 @@ name: Wake Up Render App
 
 on:
   schedule:
-    # 7:55 AM IST = 02:25 UTC
-    - cron: '25 2 * * *'
+    # 8:25 AM IST = 02:55 UTC [TEMPORARY FOR TODAY]
+    - cron: '55 2 * * *'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
