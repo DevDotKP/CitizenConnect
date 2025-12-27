@@ -82,6 +82,38 @@ const stateVotesData = {
     'IN-PY': { name: 'Puducherry', total: 1, results: [{ p: 'INC', s: 1, c: '#19aaed' }] }
 };
 
+// Render National Grid
+document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('nationalGrid');
+    if (!grid) return; // Guard clause
+
+    nationalStats.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'party-card';
+        div.innerHTML = `
+            <div class="party-header">
+                <img src="${p.symbol}" alt="${p.abbr}" style="width:40px;height:40px;object-fit:contain;">
+                <div>
+                    <h3 style="margin:0;">${p.name}</h3>
+                    <span style="color:var(--text-muted);font-size:0.9rem;">${p.abbr}</span>
+                </div>
+            </div>
+            <p style="font-size:0.9rem; color:var(--text-muted); flex-grow:1;">${p.desc}</p>
+            <div class="seat-stats">
+                <div style="text-align:center;">
+                    <span style="display:block; font-weight:bold; font-size:1.2rem;">${p.seats}</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Seats Won</span>
+                </div>
+                <div style="text-align:center;">
+                    <span style="display:block; font-weight:bold; font-size:1.2rem; color:var(--accent);">${p.voteShare}%</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Vote Share</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+});
+
 function drawMap() {
     document.getElementById('loadingMap').style.display = 'none';
 
