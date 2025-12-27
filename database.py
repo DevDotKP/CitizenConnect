@@ -439,11 +439,11 @@ def get_daily_stats():
         date_q_ts = "date(timestamp) = date('now')"
     
     # 1. New Users Today
-    cursor.execute(f"SELECT COUNT(*) FROM user_sessions WHERE {date_q}")
+    cursor.execute(f"SELECT COUNT(*) as count FROM user_sessions WHERE {date_q}")
     new_users = cursor.fetchone()['count'] if is_postgres else cursor.fetchone()[0]
     
     # 2. Avg Session Duration
-    cursor.execute(f"SELECT AVG(duration_seconds) FROM user_sessions WHERE {date_q}")
+    cursor.execute(f"SELECT AVG(duration_seconds) as avg FROM user_sessions WHERE {date_q}")
     row = cursor.fetchone()
     # Postgres returns dictionary in RealDictCursor, SQLite row/tuple
     val = row['avg'] if is_postgres and row else (row[0] if row else 0)
