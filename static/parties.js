@@ -13,7 +13,7 @@ const nationalStats = [
         seats: 240,
         percentage: 44.2,
         voteShare: 36.6,
-        symbol: "https://upload.wikimedia.org/wikipedia/commons/1/1e/Bharatiya_Janata_Party_logo.svg",
+        symbol: "/static/images/bjp_logo.svg",
         desc: "Ruling party, leads the NDA alliance. Ideology: Hindutva, Integral Humanism."
     },
     {
@@ -31,7 +31,7 @@ const nationalStats = [
         seats: 37,
         percentage: 6.8,
         voteShare: 4.6,
-        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Bicycle_Symbol.svg/240px-Bicycle_Symbol.svg.png",
+        symbol: "/static/images/sp_logo.svg",
         desc: "Major socialist party based in Uttar Pradesh. Key member of INDIA bloc."
     },
     {
