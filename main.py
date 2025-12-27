@@ -223,14 +223,40 @@ async def chat_endpoint(request: ChatRequest):
     full_prompt = f"{system_prompt}\n\nUser: {request.query}\nResponse:"
 
     try:
+    try:
         response = generate_gemini_response(full_prompt)
         
+        # Debugging: Print full response to logs
+        print(f"DEBUG: Gemini Response: {response}")
+
+        # Check for Safety/Other Blocks
+        # The SDK structure might vary, let's try to inspect candidates
+        if hasattr(response, 'candidates') and response.candidates:
+            first_candidate = response.candidates[0]
+            # check finish reason
+            if hasattr(first_candidate, 'finish_reason') and first_candidate.finish_reason != "STOP":
+                 print(f"DEBUG: Finish Reason: {first_candidate.finish_reason}")
+                 # If blocked by safety, usually finish_reason is 'SAFETY' or similar
+                 if "SAFETY" in str(first_candidate.finish_reason):
+                     return {"response": "I cannot answer this question as it may violate safety guidelines.", "chat_id": 0}
+
         # Check if response text is accessible directly
         if hasattr(response, 'text') and response.text:
              ai_text = response.text
         else:
-             # Fallback if structure is different
-             ai_text = "I'm having trouble thinking right now."
+             # Try to extract text from parts if .text helper failed but parts exist
+             try:
+                 if hasattr(response, 'candidates') and response.candidates:
+                     parts = response.candidates[0].content.parts
+                     if parts:
+                         ai_text = "".join([p.text for p in parts if hasattr(p, 'text')])
+                     else:
+                         ai_text = f"No content generated. (Reason: {response.candidates[0].finish_reason if hasattr(response.candidates[0], 'finish_reason') else 'Unknown'})"
+                 else:
+                     ai_text = "Empty response from AI service."
+             except Exception as e:
+                 print(f"Error parsing fallback: {e}")
+                 ai_text = "I'm having trouble processing the AI response structure."
 
         chat_id = save_chat_interaction(request.query, ai_text)
         return {"response": ai_text, "chat_id": chat_id}
