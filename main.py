@@ -223,7 +223,6 @@ async def chat_endpoint(request: ChatRequest):
     full_prompt = f"{system_prompt}\n\nUser: {request.query}\nResponse:"
 
     try:
-    try:
         response = generate_gemini_response(full_prompt)
         
         # Debugging: Print full response to logs
