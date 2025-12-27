@@ -152,9 +152,31 @@
 
         <!-- Interactive Map Section -->
         <section>
-            <div class="section-header">
-                <h2>Regional Dominance Map</h2>
-                <span style="color:var(--text-muted); font-size:0.9rem;">Click on a state to see regional parties</span>
+            <div class="section-header" style="flex-direction: column; align-items: start; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <h2>Regional Dominance Map</h2>
+                    <span style="color:var(--text-muted); font-size:0.9rem;">Click state for full results</span>
+                </div>
+
+                <!-- Custom Legend -->
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                        <span style="width: 12px; height: 12px; background: #fb923c; border-radius: 2px;"></span>
+                        <span style="font-size: 0.9rem; color: var(--text-muted);">BJP Lead</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                        <span style="width: 12px; height: 12px; background: #3b82f6; border-radius: 2px;"></span>
+                        <span style="font-size: 0.9rem; color: var(--text-muted);">INC Lead</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                        <span style="width: 12px; height: 12px; background: #10b981; border-radius: 2px;"></span>
+                        <span style="font-size: 0.9rem; color: var(--text-muted);">Regional Lead</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem;">
+                        <span style="width: 12px; height: 12px; background: #a855f7; border-radius: 2px;"></span>
+                        <span style="font-size: 0.9rem; color: var(--text-muted);">Mixed/Tie</span>
+                    </div>
+                </div>
             </div>
             <div id="map-container">
                 <div id="regions_div"></div>

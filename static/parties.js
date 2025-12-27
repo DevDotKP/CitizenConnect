@@ -97,11 +97,27 @@ function drawMap() {
     // Let's iterate ISO codes.
 
     for (const [code, info] of Object.entries(stateVotesData)) {
-        // Construct detailed tooltip
-        let tip = `${info.name}\nTotal Seats: ${info.total}\n\n`;
+        // Construct detailed HTML tooltip
+        let rowsHtml = '';
         info.results.forEach(r => {
-            tip += `${r.p}: ${r.s}\n`;
+            rowsHtml += `
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="color: ${r.c}; font-weight:600;">${r.p}</span>
+                <span style="margin-left:12px; font-weight:bold;">${r.s}</span>
+            </div>`;
         });
+
+        const tooltip = `
+            <div style="padding: 12px; min-width: 150px; font-family: 'Inter', sans-serif;">
+                <h4 style="margin:0 0 8px 0; border-bottom:1px solid #ddd; padding-bottom:4px; font-size:14px; color:#333;">${info.name}</h4>
+                <div style="font-size:12px; color:#444;">
+                    ${rowsHtml}
+                </div>
+                <div style="margin-top:6px; pt-1; font-size:11px; color:#666; text-align:right;">
+                    Total: ${info.total}
+                </div>
+            </div>
+        `;
 
         // Simple heuristic for color index:
         // 1: BJP Dominated (>50% seats)
@@ -114,9 +130,9 @@ function drawMap() {
 
         if (winner.p.includes('BJP')) colorVal = 1;
         else if (winner.p.includes('INC')) colorVal = 2;
-        else if (['SP', 'TMC', 'DMK', 'TDP', 'BJD', 'AAP'].some(x => winner.p.includes(x))) colorVal = 3;
+        else if (['SP', 'TMC', 'DMK', 'TDP', 'BJD', 'AAP', 'JMM', 'JKNC'].some(x => winner.p.includes(x))) colorVal = 3;
 
-        rows.push([code, colorVal, tip]);
+        rows.push([code, colorVal, tooltip]);
     }
 
     data.addRows(rows);
@@ -132,7 +148,8 @@ function drawMap() {
             values: [0, 1, 2, 3, 4]
         },
         // 1=Orange(BJP), 2=Blue(INC), 3=Green(Regional), 4=Purple(Mixed)
-        tooltip: { textStyle: { color: '#333' }, showColorCode: false },
+        legend: 'none', // Hide default legend
+        tooltip: { isHtml: true }, // Enable HTML tooltips
         keepAspectRatio: true,
         width: '100%'
     };
