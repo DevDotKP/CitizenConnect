@@ -11,7 +11,7 @@ const nationalStats = [
         seats: 240,
         percentage: 44.2,
         voteShare: 36.6,
-        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Bharatiya_Janata_Party_logo.svg/120px-Bharatiya_Janata_Party_logo.svg.png",
+        symbol: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Bharatiya_Janata_Party_logo.svg/240px-Bharatiya_Janata_Party_logo.svg.png",
         desc: "Ruling party, leads the NDA alliance. Ideology: Hindutva, Integral Humanism."
     },
     {

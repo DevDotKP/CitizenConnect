@@ -164,15 +164,17 @@ function openRepModal(rep) {
     const sourcesHtml = sources.length ?
         sources.map(s => `<span class="source-tag">${s}</span>`).join('') : '<span>N/A</span>';
 
+    const isCabinet = rep.role.includes('Minister') || rep.role.includes('Prime');
+
     body.innerHTML = `
         <div class="modal-header-content">
             <img src="${rep.image_url || 'https://via.placeholder.com/100?text=MP'}" alt="${rep.name}" class="modal-avatar">
             <div>
                 <h2 style="font-size:2rem; margin-bottom:0.5rem;">${rep.name}</h2>
                 <p style="font-size:1.1rem; color: #a5b4fc; display:flex; align-items:center;">
-                    ${rep.role} • ${rep.party} ${getPartySymbol(rep.party)}
+                    ${rep.party} ${getPartySymbol(rep.party)}
                 </p>
-                <p style="color:var(--text-muted)">${rep.constituency}, ${rep.state}</p>
+                ${isCabinet ? `<div style="background:linear-gradient(90deg, #ff9933, #f59e0b); padding:0.5rem 1rem; border-radius:8px; display:inline-block; margin-top:0.5rem; font-weight:bold; color:white;">🏛️ ${rep.role}</div>` : `<p style="color:var(--text-muted)">${rep.role} • ${rep.constituency}, ${rep.state}</p>`}
             </div>
         </div>
 
