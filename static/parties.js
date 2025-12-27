@@ -278,18 +278,20 @@ function drawMap() {
     data.addRows(rows);
 
     var options = {
-        region: 'IN',
+        region: 'IN', // Force India region to show correct borders
+        domain: 'IN',
         displayMode: 'regions',
         resolution: 'provinces',
-        backgroundColor: { fill: 'transparent' },
-        datalessRegionColor: '#1e293b',
         colorAxis: {
-            colors: ['#3b82f6', '#fb923c', '#3b82f6', '#10b981', '#a855f7'],
-            values: [0, 1, 2, 3, 4]
+            colors: ['#e5e7eb', '#ff9933', '#00BFFF', '#22c55e', '#a855f7'],
+            minValue: 0,
+            maxValue: 4
         },
-        // 1=Orange(BJP), 2=Blue(INC), 3=Green(Regional), 4=Purple(Mixed)
-        legend: 'none', // Hide default legend
-        tooltip: { isHtml: true }, // Enable HTML tooltips
+        backgroundColor: { fill: 'transparent' },
+        datalessRegionColor: '#e5e7eb',
+        defaultColor: '#f5f5f5',
+        legend: 'none', // We use custom legend
+        tooltip: { isHtml: true, textStyle: { fontName: 'Inter', fontSize: 14 } },
         keepAspectRatio: true,
         width: '100%'
     };
