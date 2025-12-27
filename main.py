@@ -35,10 +35,20 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 scheduler = BackgroundScheduler()
 
 # --- Config ---
+
+# --- Config ---
 load_dotenv()
 GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
 
-client = genai.Client(api_key=GOOGLE_API_KEY)
+if not GOOGLE_API_KEY:
+    print("CRITICAL WARNING: GOOGLE_API_KEY is not set. Chatbot will fail.")
+    client = None
+else:
+    try:
+        client = genai.Client(api_key=GOOGLE_API_KEY)
+    except Exception as e:
+        print(f"Error initializing Gemini Client: {e}")
+        client = None
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from email_service import send_daily_report
@@ -227,7 +237,13 @@ async def chat_endpoint(request: ChatRequest):
 
     except Exception as e:
         print(f"Gemini Error: {e}")
-        return {"response": "I'm currently receiving too many requests. Please try again in a minute.", "chat_id": 0}
+        error_msg = str(e)
+        if "429" in error_msg:
+             return {"response": "I'm currently receiving too many requests. Please try again in a minute.", "chat_id": 0}
+        elif "401" in error_msg or "API key" in error_msg or "Unauthenticated" in error_msg:
+             return {"response": "Configuration Error: API Key missing or invalid. Please check server logs.", "chat_id": 0}
+        else:
+             return {"response": f"I encountered an error: {error_msg}. Please try again.", "chat_id": 0}
 
 @app.post("/api/feedback")
 def feedback_endpoint(request: RatingRequest):
