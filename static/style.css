@@ -146,6 +146,14 @@ header {
     border: 2px solid var(--secondary);
 }
 
+.party-symbol {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    margin-left: 6px;
+    object-fit: contain;
+}
+
 .info h3 {
     font-size: 1.2rem;
 }
@@ -177,6 +185,90 @@ header {
 .stat-label {
     font-size: 0.8rem;
     color: var(--text-muted);
+}
+
+/* --- Modal --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-content {
+    background: #1e293b;
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 700px;
+    position: relative;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.close-modal:hover {
+    color: white;
+}
+
+.modal-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.modal-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+}
+
+.news-item {
+    background: var(--glass-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    border: 1px solid var(--glass-border);
+}
+
+.source-tag {
+    display: inline-block;
+    background: rgba(108, 99, 255, 0.2);
+    color: #a5b4fc;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 /* --- Chat Widget --- */

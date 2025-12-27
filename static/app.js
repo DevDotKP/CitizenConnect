@@ -48,6 +48,32 @@ async function fetchReps(query = '') {
     renderReps(data);
 }
 
+/* --- Party Symbols --- */
+const partySymbols = {
+    'BJP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Bharatiya_Janata_Party_logo.svg/240px-Bharatiya_Janata_Party_logo.svg.png',
+    'INC': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Indian_National_Congress_hand_logo.svg/240px-Indian_National_Congress_hand_logo.svg.png',
+    'AAP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Aam_Aadmi_Party_logo_%28English%29.svg/240px-Aam_Aadmi_Party_logo_%28English%29.svg.png',
+    'TMC': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/All_India_Trinamool_Congress_symbol.svg/240px-All_India_Trinamool_Congress_symbol.svg.png',
+    'DMK': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Rising_Sun_Symbol.svg/240px-Rising_Sun_Symbol.svg.png',
+    'CPI(M)': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Cpi_m_logo.svg/240px-Cpi_m_logo.svg.png',
+    'SP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Bicycle_Symbol.svg/240px-Bicycle_Symbol.svg.png',
+    'YSRCP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Ceiling_Fan_Symbol.svg/240px-Ceiling_Fan_Symbol.svg.png'
+};
+
+function getPartySymbol(party) {
+    if (!party) return '';
+    const cleanParty = party.trim();
+    if (partySymbols[cleanParty]) {
+        return `<img src="${partySymbols[cleanParty]}" alt="${cleanParty}" class="party-symbol" title="${cleanParty}">`;
+    }
+    for (const key of Object.keys(partySymbols)) {
+        if (cleanParty.includes(key)) {
+            return `<img src="${partySymbols[key]}" alt="${cleanParty}" class="party-symbol" title="${cleanParty}">`;
+        }
+    }
+    return '';
+}
+
 function renderReps(reps) {
     const grid = document.getElementById('repsGrid');
     grid.innerHTML = '';
@@ -69,16 +95,18 @@ function renderReps(reps) {
 
         const card = document.createElement('div');
         card.className = 'card';
+        card.onclick = () => openRepModal(rep); // Click to open modal
+
         card.innerHTML = `
             <div class="card-header">
                 <img src="${rep.image_url || 'https://via.placeholder.com/60?text=MP'}" alt="${rep.name}" class="avatar">
                 <div class="info">
                     <h3>${rep.name}</h3>
-                    <span>${rep.role} • ${rep.party}</span>
+                    <span style="display:flex; align-items:center;">${rep.role} • ${rep.party} ${getPartySymbol(rep.party)}</span>
                 </div>
             </div>
             <p style="color:var(--text-muted); font-size: 0.9rem; margin-bottom:1rem;">${rep.constituency}, ${rep.state}</p>
-            <p style="font-size: 0.95rem;">${rep.bio}</p>
+            <p style="font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${rep.bio}</p>
             <div class="stats">
                 <div class="stat-item">
                     <span class="stat-val">${rep.years_in_office || '-'} Yrs</span>
@@ -100,6 +128,103 @@ function renderReps(reps) {
         `;
         grid.appendChild(card);
     });
+}
+
+/* --- Modal Logic --- */
+function openRepModal(rep) {
+    const modal = document.getElementById('repModal');
+    const body = document.getElementById('repModalBody');
+
+    // Parse complex fields
+    let achievements = [];
+    let news = [];
+    let sources = [];
+    try { achievements = rep.achievements ? JSON.parse(rep.achievements) : []; } catch (e) { }
+    try { news = rep.news ? JSON.parse(rep.news) : []; } catch (e) { }
+    try { sources = rep.sources ? JSON.parse(rep.sources) : []; } catch (e) { }
+
+    const achievementsHtml = achievements.length ?
+        `<ul>${achievements.map(a => `<li style="margin-bottom:0.5rem;">${a}</li>`).join('')}</ul>` :
+        '<p style="color:var(--text-muted)">No specific data available.</p>';
+
+    const newsHtml = news.length ?
+        news.map(n => `
+            <div class="news-item">
+                <h5 style="margin-bottom:0.3rem">${n.headline}</h5>
+                <small style="color:var(--text-muted)">${n.date}</small>
+            </div>
+        `).join('') : '<p style="color:var(--text-muted)">No recent news.</p>';
+
+    const sourcesHtml = sources.length ?
+        sources.map(s => `<span class="source-tag">${s}</span>`).join('') : '<span>N/A</span>';
+
+    body.innerHTML = `
+        <div class="modal-header-content">
+            <img src="${rep.image_url || 'https://via.placeholder.com/100?text=MP'}" alt="${rep.name}" class="modal-avatar">
+            <div>
+                <h2 style="font-size:2rem; margin-bottom:0.5rem;">${rep.name}</h2>
+                <p style="font-size:1.1rem; color: #a5b4fc; display:flex; align-items:center;">
+                    ${rep.role} • ${rep.party} ${getPartySymbol(rep.party)}
+                </p>
+                <p style="color:var(--text-muted)">${rep.constituency}, ${rep.state}</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <p style="font-size: 1.05rem; line-height: 1.6;">${rep.bio}</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+                <h3 style="margin-bottom:1rem; border-bottom:1px solid var(--glass-border); padding-bottom:0.5rem;">Achievements</h3>
+                ${achievementsHtml}
+            </div>
+            <div>
+                <h3 style="margin-bottom:1rem; border-bottom:1px solid var(--glass-border); padding-bottom:0.5rem;">Statistics</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div>
+                        <span class="stat-label">Term Length</span>
+                        <p style="font-size:1.2rem; font-weight:bold;">${rep.years_in_office || 0} Years</p>
+                    </div>
+                    <div>
+                        <span class="stat-label">Attendance</span>
+                         <p style="font-size:1.2rem; font-weight:bold;">${rep.attendance_percentage || 0}%</p>
+                    </div>
+                     <div>
+                        <span class="stat-label">Funds Used</span>
+                         <p style="font-size:1.2rem; font-weight:bold;">₹${rep.funds_spent_crores || 0}Cr / ₹${rep.funds_total_crores || 0}Cr</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+             <h3 style="margin-bottom:1rem; border-bottom:1px solid var(--glass-border); padding-bottom:0.5rem;">Recent News & Updates</h3>
+             ${newsHtml}
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <p class="stat-label" style="margin-bottom:0.5rem;">Verified Sources:</p>
+            ${sourcesHtml}
+        </div>
+    `;
+
+    modal.classList.add('open');
+    modal.style.display = 'flex'; // Ensure flex is applied for centering
+}
+
+function closeRepModal() {
+    const modal = document.getElementById('repModal');
+    modal.classList.remove('open');
+    setTimeout(() => { modal.style.display = 'none'; }, 200); // Wait for transition if any, or instant
+}
+
+// Close on outside click
+window.onclick = function (event) {
+    const modal = document.getElementById('repModal');
+    if (event.target == modal) {
+        closeRepModal();
+    }
 }
 
 function searchReps() {

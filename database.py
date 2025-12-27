@@ -128,9 +128,39 @@ def init_db():
 
     # Migration for existing table (idempotent)
     try:
-        cursor.execute("ALTER TABLE representatives ADD COLUMN IF NOT EXISTS achievements TEXT")
+        cursor.execute("ALTER TABLE representatives ADD COLUMN achievements TEXT")
     except Exception:
-        pass # Ignore if fails on SQLite or already exists in a way that doesn't duplicate
+        pass 
+
+    try:
+        cursor.execute("ALTER TABLE representatives ADD COLUMN image_url TEXT")
+    except Exception:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE representatives ADD COLUMN news TEXT")
+    except Exception:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE representatives ADD COLUMN sources TEXT")
+    except Exception:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE representatives ADD COLUMN funds_spent_crores REAL")
+    except Exception:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE representatives ADD COLUMN funds_total_crores REAL")
+    except Exception:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE representatives ADD COLUMN attendance_percentage INTEGER")
+    except Exception:
+        pass
 
     conn.commit()
     
@@ -160,38 +190,50 @@ def init_db():
                 "Narendra Modi", "Prime Minister", "BJP", "Varanasi", "Uttar Pradesh",
                 "India's 14th Prime Minister, focus on economic development and national security. Led BJP to third consecutive term in 2024. Launched initiatives like PM Awas Yojana (Housing).",
                 10, 50.5, 50.5, 98,
-                '["3rd Term as PM", "G20 Presidency", "Digital India Expansion"]'
+                '["3rd Term as PM", "G20 Presidency", "Digital India Expansion"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Prime_Minister_Narendra_Modi_in_New_Delhi_on_June_09%2C_2024_%28cropeed%29.jpg/440px-Prime_Minister_Narendra_Modi_in_New_Delhi_on_June_09%2C_2024_%28cropeed%29.jpg",
+                '[{"headline": "PM Modi inaugurates new infrastructure projects", "date": "2024-12-20"}, {"headline": "Address to the nation on Republic Day", "date": "2025-01-26"}]',
+                '["PMO India", "The Hindu", "ANI"]'
             ),
             (
                 "Rahul Gandhi", "Leader of Opposition", "INC", "Rae Bareli", "Uttar Pradesh",
                 "Leader of the Opposition in Lok Sabha (2024-). Spearheaded Bharat Jodo Yatra. Focus on social justice and caste census advocacy. Won from Wayanad and Rae Bareli in 2024.",
                 20, 12.0, 15.0, 85,
-                '["Bharat Jodo Yatra", "Leader of Opposition 2024", "Caste Census Advocacy"]'
+                '["Bharat Jodo Yatra", "Leader of Opposition 2024", "Caste Census Advocacy"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Rahul_Gandhi_2024.jpg/440px-Rahul_Gandhi_2024.jpg",
+                '[{"headline": "Rahul Gandhi speaks on unemployment in Lok Sabha", "date": "2024-12-15"}, {"headline": "Bharat Jodo Nyay Yatra concludes", "date": "2024-03-20"}]',
+                '["INC India", "The Indian Express", "NDTV"]'
             ),
             (
                 "Amit Shah", "Home Minister", "BJP", "Gandhinagar", "Gujarat",
                 "Union Home Minister and Minister of Cooperation. Key strategist for BJP. Oversaw abrogation of Article 370 and new criminal laws. Longest serving Home Minister.",
                 5, 25.0, 25.0, 92,
-                '["Abrogation of Article 370", "New Criminal Laws", "Cooperation Ministry"]'
+                '["Abrogation of Article 370", "New Criminal Laws", "Cooperation Ministry"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Amit_Shah_in_New_Delhi_on_June_09%2C_2024_%28cropped%29.jpg/440px-Amit_Shah_in_New_Delhi_on_June_09%2C_2024_%28cropped%29.jpg",
+                '[{"headline": "Amit Shah reviews security situation in J&K", "date": "2024-12-22"}, {"headline": "New criminal laws to be implemented", "date": "2024-07-01"}]',
+                '["MHA", "Times of India", "News18"]'
             ),
             (
                 "Shashi Tharoor", "MP", "INC", "Thiruvananthapuram", "Kerala",
                 "Diplomat, author, and politician. Chairman of Parliamentary Committee on External Affairs. Former UN Under-Secretary-General. Known for literary works and articulate speeches.",
                 15, 8.5, 10.0, 90,
-                '["Sahitya Akademi Award", "Chairman External Affairs", "Diplomatic Service"]'
+                '["Sahitya Akademi Award", "Chairman External Affairs", "Diplomatic Service"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Shashi_Tharoor_in_2024_%28cropped%29.jpg/440px-Shashi_Tharoor_in_2024_%28cropped%29.jpg",
+                '[{"headline": "Tharoor discusses foreign policy challenges", "date": "2024-11-10"}, {"headline": "Launch of new book on Indian politics", "date": "2024-10-05"}]',
+                '["Shashi Tharoor Official", "The Print", "Hindustan Times"]'
             ) 
         ]
         
         # Postgres uses %s, SQLite uses ?
         if is_postgres:
             insert_sql = """
-            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements, image_url, news, sources)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
         else:
             insert_sql = """
-            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements, image_url, news, sources)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
             
         for rp in rps:
@@ -199,6 +241,80 @@ def init_db():
             
         conn.commit()
         print("Seeding complete.")
+
+    else:
+        # Patch Update: Ensure Real Representatives exist and have rich data
+        print("Verifying core representatives...")
+        
+        # We'll define the core reps with their full data
+        core_reps = [
+            (
+                "Narendra Modi", "Prime Minister", "BJP", "Varanasi", "Uttar Pradesh",
+                "India's 14th Prime Minister, focus on economic development and national security. Led BJP to third consecutive term in 2024. Launched initiatives like PM Awas Yojana (Housing).",
+                10, 50.5, 50.5, 98,
+                '["3rd Term as PM", "G20 Presidency", "Digital India Expansion"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Prime_Minister_Narendra_Modi_in_New_Delhi_on_June_09%2C_2024_%28cropeed%29.jpg/440px-Prime_Minister_Narendra_Modi_in_New_Delhi_on_June_09%2C_2024_%28cropeed%29.jpg",
+                '[{"headline": "PM Modi inaugurates new infrastructure projects", "date": "2024-12-20"}, {"headline": "Address to the nation on Republic Day", "date": "2025-01-26"}]',
+                '["PMO India", "The Hindu", "ANI"]'
+            ),
+            (
+                "Rahul Gandhi", "Leader of Opposition", "INC", "Rae Bareli", "Uttar Pradesh",
+                "Leader of the Opposition in Lok Sabha (2024-). Spearheaded Bharat Jodo Yatra. Focus on social justice and caste census advocacy. Won from Wayanad and Rae Bareli in 2024.",
+                20, 12.0, 15.0, 85,
+                '["Bharat Jodo Yatra", "Leader of Opposition 2024", "Caste Census Advocacy"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Rahul_Gandhi_2024.jpg/440px-Rahul_Gandhi_2024.jpg",
+                '[{"headline": "Rahul Gandhi speaks on unemployment in Lok Sabha", "date": "2024-12-15"}, {"headline": "Bharat Jodo Nyay Yatra concludes", "date": "2024-03-20"}]',
+                '["INC India", "The Indian Express", "NDTV"]'
+            ),
+            (
+                "Amit Shah", "Home Minister", "BJP", "Gandhinagar", "Gujarat",
+                "Union Home Minister and Minister of Cooperation. Key strategist for BJP. Oversaw abrogation of Article 370 and new criminal laws. Longest serving Home Minister.",
+                5, 25.0, 25.0, 92,
+                '["Abrogation of Article 370", "New Criminal Laws", "Cooperation Ministry"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Amit_Shah_in_New_Delhi_on_June_09%2C_2024_%28cropped%29.jpg/440px-Amit_Shah_in_New_Delhi_on_June_09%2C_2024_%28cropped%29.jpg",
+                '[{"headline": "Amit Shah reviews security situation in J&K", "date": "2024-12-22"}, {"headline": "New criminal laws to be implemented", "date": "2024-07-01"}]',
+                '["MHA", "Times of India", "News18"]'
+            ),
+            (
+                "Shashi Tharoor", "MP", "INC", "Thiruvananthapuram", "Kerala",
+                "Diplomat, author, and politician. Chairman of Parliamentary Committee on External Affairs. Former UN Under-Secretary-General. Known for literary works and articulate speeches.",
+                15, 8.5, 10.0, 90,
+                '["Sahitya Akademi Award", "Chairman External Affairs", "Diplomatic Service"]',
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Shashi_Tharoor_in_2024_%28cropped%29.jpg/440px-Shashi_Tharoor_in_2024_%28cropped%29.jpg",
+                '[{"headline": "Tharoor discusses foreign policy challenges", "date": "2024-11-10"}, {"headline": "Launch of new book on Indian politics", "date": "2024-10-05"}]',
+                '["Shashi Tharoor Official", "The Print", "Hindustan Times"]'
+            )
+        ]
+
+        if is_postgres:
+            check_sql = "SELECT id FROM representatives WHERE name = %s"
+            insert_sql = """
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements, image_url, news, sources)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            update_sql = "UPDATE representatives SET image_url = %s, news = %s, sources = %s WHERE name = %s"
+        else:
+            check_sql = "SELECT id FROM representatives WHERE name = ?"
+            insert_sql = """
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage, achievements, image_url, news, sources)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            update_sql = "UPDATE representatives SET image_url = ?, news = ?, sources = ? WHERE name = ?"
+
+        for rp in core_reps:
+            name = rp[0]
+            cursor.execute(check_sql, (name,))
+            existing = cursor.fetchone()
+            
+            if existing:
+                # Update with new rich data if it exists
+                # indices: 11=image_url, 12=news, 13=sources. name is 0.
+                cursor.execute(update_sql, (rp[11], rp[12], rp[13], name))
+            else:
+                # Insert
+                cursor.execute(insert_sql, rp)
+                
+        conn.commit()
 
     conn.close()
     print("Database initialized.")

@@ -2,8 +2,8 @@ name: Wake Up Render App
 
 on:
   schedule:
-    # 8:40 AM IST = 03:10 UTC
-    - cron: '10 3 * * *'
+    # 9:00 AM IST = 03:30 UTC
+    - cron: '30 3 * * *'
   workflow_dispatch:
 
 jobs:
@@ -13,6 +13,6 @@ jobs:
     steps:
       - name: Check URL and Ping
         run: |
-          RENDER_URL="https://citizenconnect-3um7.onrender.com"
+          RENDER_URL="${{ secrets.RENDER_APP_URL }}"
           echo "Pinging $RENDER_URL/healthChecker"
           curl -I "$RENDER_URL/healthChecker"
