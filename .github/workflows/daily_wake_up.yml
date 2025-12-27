@@ -1,0 +1,23 @@
+name: Wake Up Render App
+
+on:
+  schedule:
+    # 8:25 AM IST = 02:55 UTC
+    - cron: '55 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping_render:
+    name: Ping Render URL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check URL and Ping
+        env:
+          RENDER_URL: ${{ secrets.RENDER_APP_URL }}
+        run: |
+          if [ -z "$RENDER_URL" ]; then
+            echo "Error: RENDER_APP_URL secret is not set."
+            exit 1
+          fi
+          echo "Pinging $RENDER_URL/healthChecker"
+          curl -I "$RENDER_URL/healthChecker"
