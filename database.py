@@ -147,6 +147,56 @@ def init_db():
     ''')
 
     conn.commit()
+    
+    # --- SEED DATA (If Empty) ---
+    cursor.execute("SELECT COUNT(*) FROM representatives")
+    count_res = cursor.fetchone()
+    # Handle PG vs SQLite return type
+    count = count_res['count'] if is_postgres and count_res else (count_res[0] if count_res else 0)
+
+    if count == 0:
+        print("Seeding database with initial representatives...")
+        rps = [
+            (
+                "Narendra Modi", "Prime Minister", "BJP", "Varanasi", "Uttar Pradesh",
+                "India's 14th Prime Minister, focus on economic development and national security. Led BJP to third consecutive term in 2024. Launched initiatives like PM Awas Yojana (Housing).",
+                10, 50.5, 50.5, 98
+            ),
+            (
+                "Rahul Gandhi", "Leader of Opposition", "INC", "Rae Bareli", "Uttar Pradesh",
+                "Leader of the Opposition in Lok Sabha (2024-). Spearheaded Bharat Jodo Yatra. Focus on social justice and caste census advocacy. Won from Wayanad and Rae Bareli in 2024.",
+                20, 12.0, 15.0, 85
+            ),
+            (
+                "Amit Shah", "Home Minister", "BJP", "Gandhinagar", "Gujarat",
+                "Union Home Minister and Minister of Cooperation. Key strategist for BJP. Oversaw abrogation of Article 370 and new criminal laws. Longest serving Home Minister.",
+                5, 25.0, 25.0, 92
+            ),
+            (
+                "Shashi Tharoor", "MP", "INC", "Thiruvananthapuram", "Kerala",
+                "Diplomat, author, and politician. Chairman of Parliamentary Committee on External Affairs. Former UN Under-Secretary-General. Known for literary works and articulate speeches.",
+                15, 8.5, 10.0, 90
+            ) 
+        ]
+        
+        # Postgres uses %s, SQLite uses ?
+        if is_postgres:
+            insert_sql = """
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+        else:
+            insert_sql = """
+            INSERT INTO representatives (name, role, party, constituency, state, bio, years_in_office, funds_spent_crores, funds_total_crores, attendance_percentage)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            
+        for rp in rps:
+            cursor.execute(insert_sql, rp)
+            
+        conn.commit()
+        print("Seeding complete.")
+
     conn.close()
     print("Database initialized.")
 
