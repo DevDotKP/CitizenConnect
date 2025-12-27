@@ -1,0 +1,20 @@
+name: Wake Up Render App
+
+on:
+  schedule:
+    # 7:55 AM IST = 02:25 UTC
+    - cron: '25 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  wake_up:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake up App
+        run: |
+          if [ -z "${{ secrets.RENDER_APP_URL }}" ]; then
+            echo "RENDER_APP_URL secret is not set!"
+            exit 1
+          fi
+          echo "Pinging ${{ secrets.RENDER_APP_URL }}/healthChecker..."
+          curl -I "${{ secrets.RENDER_APP_URL }}/healthChecker"

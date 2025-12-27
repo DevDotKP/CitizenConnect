@@ -40,13 +40,26 @@ GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
 
 client = genai.Client(api_key=GOOGLE_API_KEY)
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from email_service import send_daily_report
+
+# Initialize Scheduler
+scheduler = AsyncIOScheduler()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     try:
         init_db()
+        
+        # Schedule Daily Report at 8:00 AM IST (02:30 UTC)
+        # IST is UTC+5:30. 8:00 AM IST = 02:30 AM UTC.
+        scheduler.add_job(send_daily_report, 'cron', hour=2, minute=30)
+        scheduler.start()
+        print("Scheduler started. Daily email set for 02:30 UTC (8:00 AM IST).")
+        
     except Exception as e:
-        print(f"Startup DB Error: {e}")
+        print(f"Startup Error: {e}")
     yield
     # Shutdown
     # (Optional: close connections if needed, though usually handled per request)
@@ -215,6 +228,13 @@ def login(username: str = Depends(verify_admin)):
 @app.get("/healthChecker")
 def health_check():
     return {"status": "ok"}
+
+@app.get("/api/test-email")
+async def test_email_endpoint():
+    success = await send_daily_report()
+    if success:
+        return {"status": "success", "message": "Email sent"}
+    return {"status": "error", "message": "Failed to send email"}
 
 # --- Static Files ---
 app.mount("/static", StaticFiles(directory="static"), name="static")

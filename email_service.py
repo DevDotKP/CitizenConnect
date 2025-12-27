@@ -2,96 +2,95 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
-from datetime import datetime
-from database import get_daily_stats, get_advanced_stats
-from security_utils import get_secret
+from datetime import datetime, timedelta
+import psycopg2
+from database import get_db_connection
+from dotenv import load_dotenv
 
-def send_daily_report():
-    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-    smtp_port = int(os.getenv("SMTP_PORT", 587))
-    smtp_user = get_secret("SMTP_USER")
-    smtp_password = get_secret("SMTP_PASSWORD")
-    admin_email = smtp_user # Send to self/admin
-    recipient_email = admin_email
+load_dotenv()
 
-    stats = get_daily_stats()
-    adv_stats = get_advanced_stats()
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+ADMIN_EMAIL = "medha@example.com" # Replace with user's actual email if known, or use env var
+TARGET_EMAIL = os.getenv("TARGET_EMAIL", SMTP_USER) # Default to sending to self if not specified
+
+def get_daily_stats():
+    """Fetch statistics for the past 24 hours."""
+    conn = get_db_connection()
+    cur = conn.cursor()
     
-    # 1. Generate Report
-    today = datetime.now().strftime("%Y-%m-%d")
-    subject = f"CitizenConnect Daily Analytics Report - {today}"
+    yesterday = datetime.now() - timedelta(days=1)
     
-    html_content = f"""
-    <html>
-    <head>
-        <style>
-            body {{ font-family: Arial, sans-serif; color: #333; }}
-            .header {{ background-color: #6C63FF; color: white; padding: 15px; text-align: center; }}
-            .stat-box {{ border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }}
-            .highlight {{ color: #6C63FF; font-weight: bold; font-size: 1.2em; }}
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h2>CitizenConnect Analytics</h2>
-            <p>{today}</p>
-        </div>
-        
-        <div class="stat-box">
-            <p>New Users Today: <span class="highlight">{stats['new_users']}</span></p>
-            <p>Average Session Duration: <span class="highlight">{stats['avg_duration']}s</span></p>
-        </div>
-        
-        <div class="stat-box">
-            <h3>Top Actions</h3>
-            <ul>
-                {"".join([f"<li>{x['event_type']}: {x['count']}</li>" for x in stats['top_actions']])}
-            </ul>
-        </div>
+    # Total Chats
+    cur.execute("SELECT COUNT(*) FROM chat_history WHERE timestamp > %s", (yesterday,))
+    total_chats = cur.fetchone()['count']
+    
+    # Active Users (unique sessions)
+    cur.execute("SELECT COUNT(DISTINCT session_id) FROM analytics_events WHERE timestamp > %s", (yesterday,))
+    active_users = cur.fetchone()['count']
+    
+    # Top 5 Queries
+    cur.execute("""
+        SELECT user_query, COUNT(*) as freq 
+        FROM chat_history 
+        WHERE timestamp > %s 
+        GROUP BY user_query 
+        ORDER BY freq DESC 
+        LIMIT 5
+    """, (yesterday,))
+    top_queries = cur.fetchall()
+    
+    conn.close()
+    
+    return {
+        "total_chats": total_chats,
+        "active_users": active_users,
+        "top_queries": top_queries,
+        "date": yesterday.strftime('%Y-%m-%d')
+    }
 
-        <div class="stat-box">
-            <h3>Geographic Distribution</h3>
-            <ul>
-                 {"".join([f"<li>{x['location']}: {x['count']}</li>" for x in adv_stats['top_locations']])}
-            </ul>
-        </div>
-        
-        <div class="stat-box">
-            <h3>Top Drop-off Points</h3>
-            <ul>
-                 {"".join([f"<li>{x['event_type']}: {x['count']}</li>" for x in adv_stats['drop_offs']])}
-            </ul>
-        </div>
-        
-        <p><small>This is an automated message from your Admin Dashboard.</small></p>
-    </body>
-    </html>
+def format_email_body(stats):
+    body = f"""
+    <h2>CitizenConnect Daily Report - {stats['date']}</h2>
+    <p>Here is the summary of activity for the past 24 hours:</p>
+    
+    <ul>
+        <li><strong>Total Chats:</strong> {stats['total_chats']}</li>
+        <li><strong>Active Users:</strong> {stats['active_users']}</li>
+    </ul>
+    
+    <h3>Top Queries:</h3>
+    <ul>
     """
-    
-    # 2. Send Email
-    if not smtp_user or not smtp_password:
-        print("--- [MOCK EMAIL SENT] ---")
-        print(f"To: {recipient_email}")
-        print(f"Subject: {subject}")
-        print("Body: (HTML content hidden for brevity)")
-        print("--- End Mock Email ---")
-        return
-
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = smtp_user
-        msg['To'] = recipient_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(html_content, 'html'))
+    for q in stats['top_queries']:
+        body += f"<li>{q['user_query']} ({q['freq']} times)</li>"
         
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(msg)
-        server.quit()
-        print(f"Daily report email sent to {recipient_email}")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+    body += "</ul>"
+    return body
 
-if __name__ == "__main__":
-    send_daily_report()
+async def send_daily_report():
+    print("Generating daily report...")
+    try:
+        stats = get_daily_stats()
+        html_body = format_email_body(stats)
+        
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_USER
+        msg['To'] = TARGET_EMAIL
+        msg['Subject'] = f"CitizenConnect Daily Analytics - {stats['date']}"
+        
+        msg.attach(MIMEText(html_body, 'html'))
+        
+        print(f"Connecting to SMTP: {SMTP_SERVER}:{SMTP_PORT}")
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+            
+        print("Daily report sent successfully.")
+        return True
+    except Exception as e:
+        print(f"Failed to send daily report: {e}")
+        return False
