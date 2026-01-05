@@ -156,7 +156,7 @@ def init_db():
     cursor.execute(f'''
     CREATE TABLE IF NOT EXISTS chat_history (
         id {pk_type},
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         user_query TEXT,
         ai_response TEXT,
         rating INTEGER
@@ -168,8 +168,8 @@ def init_db():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_sessions (
         session_id TEXT PRIMARY KEY,
-        start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-        last_heartbeat DATETIME DEFAULT CURRENT_TIMESTAMP,
+        start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_heartbeat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         duration_seconds REAL DEFAULT 0,
         ip_address TEXT,
         user_agent TEXT,
@@ -184,7 +184,7 @@ def init_db():
     CREATE TABLE IF NOT EXISTS analytics_events (
         id {pk_type},
         session_id TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         event_type TEXT,
         details TEXT
     )
