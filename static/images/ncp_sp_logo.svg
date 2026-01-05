@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Trumpet Body -->
+  <path d="M20 70 Q40 70 60 50 L80 30" fill="none" stroke="#d4af37" stroke-width="8"/>
+  <!-- Bell -->
+  <path d="M80 30 L95 15 L85 40 Z" fill="#d4af37"/>
+  <!-- Mouthpiece -->
+  <circle cx="20" cy="70" r="5" fill="#d4af37"/>
+</svg>

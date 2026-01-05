@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Wheels -->
+  <circle cx="25" cy="70" r="15" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="75" cy="70" r="15" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Frame -->
+  <line x1="25" y1="70" x2="50" y2="45" stroke="#d92c2c" stroke-width="4"/>
+  <line x1="50" y1="45" x2="75" y2="70" stroke="#d92c2c" stroke-width="4"/>
+  <line x1="50" y1="45" x2="70" y2="45" stroke="#d92c2c" stroke-width="4"/>
+  <line x1="25" y1="70" x2="45" y2="45" stroke="#d92c2c" stroke-width="4"/>
+  <!-- Handlebars -->
+  <path d="M65 45 Q65 30 55 35" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Seat -->
+  <line x1="45" y1="45" x2="45" y2="35" stroke="black" stroke-width="4"/>
+  <line x1="40" y1="35" x2="50" y2="35" stroke="black" stroke-width="4"/>
+  <!-- Background Flag Colors -->
+  <rect x="0" y="0" width="100" height="20" fill="#d92c2c" opacity="0.1"/>
+  <rect x="0" y="20" width="100" height="20" fill="#138808" opacity="0.1"/>
+</svg>

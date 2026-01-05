@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Mountains -->
+  <path d="M0 80 L30 50 L60 80 Z" fill="black" stroke="none"/>
+  <path d="M40 80 L70 50 L100 80 Z" fill="black" stroke="none"/>
+  <!-- Sun -->
+  <circle cx="50" cy="40" r="15" fill="#facc15" stroke="none"/>
+  <!-- Rays -->
+  <line x1="50" y1="20" x2="50" y2="5" stroke="#facc15" stroke-width="3"/>
+  <line x1="30" y1="40" x2="15" y2="40" stroke="#facc15" stroke-width="3"/>
+  <line x1="70" y1="40" x2="85" y2="40" stroke="#facc15" stroke-width="3"/>
+  <line x1="36" y1="26" x2="26" y2="16" stroke="#facc15" stroke-width="3"/>
+  <line x1="64" y1="26" x2="74" y2="16" stroke="#facc15" stroke-width="3"/>
+</svg>

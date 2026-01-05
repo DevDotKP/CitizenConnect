@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<!-- Bow -->
+<path d="M30 20 Q10 50 30 80" fill="none" stroke="green" stroke-width="5"/>
+<line x1="30" y1="20" x2="30" y2="80" stroke="green" stroke-width="2"/>
+<!-- Arrow -->
+<line x1="10" y1="50" x2="60" y2="50" stroke="green" stroke-width="3"/>
+<path d="M60 50 L50 45 L50 55 Z" fill="green" stroke="none"/>
+</svg>

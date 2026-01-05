@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Kite Body -->
+  <path d="M50 10 L80 40 L50 80 L20 40 Z" fill="#4caf50" stroke="none"/>
+  <!-- Cross Bars -->
+  <line x1="50" y1="10" x2="50" y2="80" stroke="black" stroke-width="1"/>
+  <path d="M20 40 Q50 60 80 40" fill="none" stroke="black" stroke-width="1"/>
+  <!-- Tail -->
+  <path d="M45 80 L55 80 L50 90 Z" fill="#4caf50" stroke="none"/>
+</svg>

@@ -52,18 +52,24 @@ async function fetchReps(query = '') {
 const partySymbols = {
     'BJP': '/static/images/bjp_logo.svg',
     'Bharatiya Janata Party': '/static/images/bjp_logo.svg',
-    'INC': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Indian_National_Congress_hand_logo.svg/240px-Indian_National_Congress_hand_logo.svg.png',
-    'Indian National Congress': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Indian_National_Congress_hand_logo.svg/240px-Indian_National_Congress_hand_logo.svg.png',
-    'AAP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Aam_Aadmi_Party_logo_%28English%29.svg/240px-Aam_Aadmi_Party_logo_%28English%29.svg.png',
-    'Aam Aadmi Party': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Aam_Aadmi_Party_logo_%28English%29.svg/240px-Aam_Aadmi_Party_logo_%28English%29.svg.png',
-    'TMC': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/All_India_Trinamool_Congress_symbol.svg/240px-All_India_Trinamool_Congress_symbol.svg.png',
-    'Trinamool Congress': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/All_India_Trinamool_Congress_symbol.svg/240px-All_India_Trinamool_Congress_symbol.svg.png',
-    'DMK': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Rising_Sun_Symbol.svg/240px-Rising_Sun_Symbol.svg.png',
-    'CPI(M)': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Cpi_m_logo.svg/240px-Cpi_m_logo.svg.png',
+    'INC': '/static/images/inc_logo.svg',
+    'Indian National Congress': '/static/images/inc_logo.svg',
+    'AAP': '/static/images/aap_logo.svg',
+    'Aam Aadmi Party': '/static/images/aap_logo.svg',
+    'TMC': '/static/images/tmc_logo.png',
+    'Trinamool Congress': '/static/images/tmc_logo.png',
+    'DMK': '/static/images/dmk_logo.svg',
+    'CPI(M)': '/static/images/cpi_m_logo.svg',
     'SP': '/static/images/sp_logo.svg',
     'Samajwadi Party': '/static/images/sp_logo.svg',
+    'TDP': '/static/images/tdp_logo.svg',
     'YSRCP': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Ceiling_Fan_Symbol.svg/240px-Ceiling_Fan_Symbol.svg.png',
-    'Shiv Sena': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Shiv_Sena_logo_2022.svg/240px-Shiv_Sena_logo_2022.svg.png'
+    'Shiv Sena': '/static/images/shs_logo.svg',
+    'Shiv Sena (UBT)': '/static/images/ss_ubt_logo.svg',
+    'NCP': '/static/images/ncp_sp_logo.svg',
+    'NCP (SP)': '/static/images/ncp_sp_logo.svg',
+    'JMM': '/static/images/jmm_logo.svg',
+    'JD(U)': '/static/images/jdu_logo.svg'
 };
 
 function getPartySymbol(party) {

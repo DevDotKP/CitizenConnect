@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Handle -->
+  <rect x="45" y="50" width="10" height="40" fill="#8B4513"/>
+  <!-- Top cup -->
+  <path d="M35 50 L65 50 L60 70 L40 70 Z" fill="#A0522D"/>
+  <!-- Flame -->
+  <path d="M40 50 Q30 30 50 10 Q70 30 60 50 Z" fill="#ff5722"/>
+  <path d="M45 50 Q40 35 50 20 Q60 35 55 50 Z" fill="#ffeb3b"/>
+</svg>

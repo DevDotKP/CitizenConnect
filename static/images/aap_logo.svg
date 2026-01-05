@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" transform="rotate(-45 50 50)">
+  <!-- Handle -->
+  <rect x="45" y="10" width="10" height="50" fill="#8B4513" stroke="none"/>
+  <!-- Bristles -->
+  <path d="M30 60 L70 60 L80 90 L20 90 Z" fill="#F4A460" stroke="none"/>
+  <line x1="35" y1="60" x2="25" y2="90" stroke="#8B4513" stroke-width="1"/>
+  <line x1="45" y1="60" x2="45" y2="90" stroke="#8B4513" stroke-width="1"/>
+  <line x1="55" y1="60" x2="65" y2="90" stroke="#8B4513" stroke-width="1"/>
+  <!-- Bands -->
+  <rect x="30" y="65" width="40" height="5" fill="#000080" />
+</svg>

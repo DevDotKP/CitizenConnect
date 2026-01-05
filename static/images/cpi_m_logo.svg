@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect x="0" y="0" width="100" height="100" fill="#d32f2f"/>
+  <!-- Sickle -->
+  <path d="M50 20 A 30 30 0 1 0 70 70" fill="none" stroke="white" stroke-width="6"/>
+  <line x1="70" y1="70" x2="70" y2="85" stroke="white" stroke-width="6"/>
+  <!-- Hammer -->
+  <line x1="25" y1="25" x2="75" y2="75" stroke="white" stroke-width="6"/>
+  <rect x="20" y="20" width="20" height="10" fill="white" transform="rotate(-45 30 25)"/>
+</svg>
