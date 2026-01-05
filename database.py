@@ -417,8 +417,8 @@ def get_daily_stats():
     is_postgres = os.getenv("DATABASE_URL") is not None
     
     if is_postgres:
-        date_q = "date(start_time) = CURRENT_DATE"
-        date_q_ts = "date(timestamp) = CURRENT_DATE"
+        date_q = "start_time::date = CURRENT_DATE"
+        date_q_ts = "timestamp::date = CURRENT_DATE"
     else:
         date_q = "date(start_time) = date('now')"
         date_q_ts = "date(timestamp) = date('now')"
@@ -453,7 +453,7 @@ def get_advanced_stats():
     
     if is_postgres:
         # Postgres uses TO_CHAR for formatting and CURRENT_DATE
-        date_q = "date(timestamp) = CURRENT_DATE"
+        date_q = "timestamp::date = CURRENT_DATE"
         hour_q = "TO_CHAR(timestamp, 'HH24') as hour"
     else:
         # SQLite uses strftime and date('now')
