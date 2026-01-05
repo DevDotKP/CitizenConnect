@@ -12,6 +12,11 @@
     --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
+html {
+    font-size: 112.5%;
+    /* Approx 18px base size to zoom in UI */
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -31,7 +36,7 @@ body {
 
 /* --- Layout --- */
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 2rem;
 }
